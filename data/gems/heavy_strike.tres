@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SkillGem" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_gem.gd" id="1_gem"]
+
+[resource]
+script = ExtResource("1_gem")
+id = &"heavy_strike"
+display_name = "Heavy Strike"
+short_name = "Heavy"
+description = "A slow, powerful strike against a single enemy."
+tags = Array[StringName]([&"attack", &"melee", &"strike"])
+mana_cost = 0.0
+damage_multiplier = 1.4
+windup = 0.26
+recovery = 0.32
+reach = 1.6
+arc_degrees = 110.0

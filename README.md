@@ -19,9 +19,10 @@ C:/GoDot/Godot_v4.7.2-stable_win64.exe --path C:/GoDot/Projects/Godot-Opus-ARPG
 | Input | Action | Status |
 |---|---|---|
 | Left click (hold) | Move to the cursor | **Working** |
-| Right click (hold) | Heavy Strike: click an enemy to walk up and hit it, or click the ground to swing in place | **Working** |
-| Q W E R T | Skill slots 1–5 | Bound, no behavior yet |
-| 1–5 | Potions 1–5 | Bound, no behavior yet |
+| Right click (hold) | Skill in the RMB slot (Heavy Strike): click an enemy to walk up and hit it, or click the ground to swing in place | **Working** |
+| Q W E R T | Skill slots (Q = Cleave, W = Leap Slam). Click a slot on the skill bar to change its skill | **Working** |
+| 1 / 2 | Health potion / mana potion | **Working** |
+| 3–5 | Future potions | Bound, no behavior yet |
 | I / C / P | Inventory / character / passives | Bound, no behavior yet |
 | Alt (hold) | Show ground-item labels | Bound, no behavior yet |
 | Esc | Menu | Bound, no behavior yet |
@@ -67,6 +68,30 @@ Keys are bound by physical location, so they stay in the same place on non-QWERT
 - **Reusable components:** `Health`, `MeleeAttack` and `NavMovement` are shared by the player and
   the goblins.
 
+## Milestone 3: "Gems and potions"
+
+- **Gems** are resources in `data/gems/`: `GemData` is the base, and `SkillGem` is an active skill.
+  Supports and sockets come in Milestone 4.
+- **Skill damage** is the weapon roll (9–15 on the placeholder weapon, set on the `Melee` node)
+  times the gem's multiplier:
+
+| Gem | Slot | Mana | Cooldown | Damage | Behavior |
+|---|---|---|---|---|---|
+| Heavy Strike | RMB | 0 | – | 140% | Hits the closest enemy in front |
+| Cleave | Q | 5 | – | 90% | Hits every enemy in a 160° arc, reach 2.2 |
+| Leap Slam | W | 10 | 1.5 s | 100% | Jumps up to 8 units toward the cursor and hits everything within 2 units of the landing spot |
+
+- **Skill bar** (`SkillBar`) has six slots: RMB and Q–T. It tracks cooldowns and checks mana.
+  Clicking a slot on the HUD cycles it through the known gems. Out of mana or on cooldown, a
+  warning appears above the skill bar.
+- **Mana** is 50, regenerating 2 per second.
+- **Potions** are resources in `data/potions/`:
+  - Health (key 1) restores 50 life over 1 s.
+  - Mana (key 2) restores 30 mana over 2 s.
+  - Each holds 30 charges and uses 10 per drink.
+  - Kills add 3 charges to each potion, and respawning refills them.
+  - The HUD shows each potion's fill beside the life bar.
+
 ### Why a perspective camera
 
 The camera uses **perspective with a narrow 35° FOV** instead of orthographic because:
@@ -100,6 +125,16 @@ C:/GoDot/Godot_v4.7.2-stable_win64.exe --headless --path C:/GoDot/Projects/Godot
 
 The fight test checks spawning, goblin aggro and chase, killing a goblin with Heavy Strike,
 goblins hitting back, corpse cleanup, swinging in place, and death and respawn.
+
+Run the headless Milestone 3 test:
+
+```bash
+C:/GoDot/Godot_v4.7.2-stable_win64.exe --headless --path C:/GoDot/Projects/Godot-Opus-ARPG -s res://tests/test_skills.gd
+```
+
+The skills test checks the loadout, Cleave hitting multiple enemies, Heavy Strike hitting one,
+Leap Slam's movement, damage and cooldown, refusal when out of mana, mana regeneration, both
+potions, empty potions, and charges gained from kills.
 
 It checks that:
 - every Input Map action exists and is bound

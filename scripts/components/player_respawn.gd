@@ -9,6 +9,8 @@ signal respawned
 @export var movement: NavMovement
 @export var melee: MeleeAttack
 @export var combat: PlayerCombat
+@export var mana: Mana
+@export var potions: PotionBelt
 ## Visual root that tips over on death.
 @export var visual: Node3D
 @export var respawn_delay: float = 3.0
@@ -40,4 +42,6 @@ func _respawn() -> void:
 	_body.reset_physics_interpolation()
 	movement.stop()
 	health.restore_full()
+	mana.restore_full()
+	potions.refill()
 	respawned.emit()

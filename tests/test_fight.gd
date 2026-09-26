@@ -66,7 +66,7 @@ func _test_kill_goblin() -> void:
 	var frames: int = 0
 	# Re-issue the order each time the previous strike lands, like holding the button.
 	while frames < 600 and not died[0]:
-		if not (_player.get_node("HeavyStrike") as MeleeAttack).is_busy():
+		if not (_player.get_node("Melee") as MeleeAttack).is_busy():
 			combat.attack_target(goblin)
 		await physics_frame
 		frames += 1
@@ -80,7 +80,7 @@ func _test_kill_goblin() -> void:
 
 
 func _test_strike_in_place() -> void:
-	var melee: MeleeAttack = _player.get_node("HeavyStrike") as MeleeAttack
+	var melee: MeleeAttack = _player.get_node("Melee") as MeleeAttack
 	var finished: Array[bool] = [false]
 	var on_finished := func() -> void: finished[0] = true
 	melee.swing_finished.connect(on_finished)

@@ -56,6 +56,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _on_died() -> void:
+	get_tree().call_group(PotionBelt.KILL_LISTENERS, "on_enemy_killed", _body)
 	melee.cancel()
 	movement.stop()
 	# Corpses can't be hit or block anyone; the tween below owns their motion.

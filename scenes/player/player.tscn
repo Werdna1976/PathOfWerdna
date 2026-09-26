@@ -9,6 +9,14 @@
 [ext_resource type="Script" path="res://scripts/components/player_respawn.gd" id="7_respawn"]
 [ext_resource type="Script" path="res://scripts/components/hit_feedback.gd" id="8_feedback"]
 [ext_resource type="Script" path="res://scripts/components/swing_animator.gd" id="9_swing"]
+[ext_resource type="Script" path="res://scripts/components/mana.gd" id="10_mana"]
+[ext_resource type="Script" path="res://scripts/components/skill_bar.gd" id="11_skills"]
+[ext_resource type="Script" path="res://scripts/components/potion_belt.gd" id="12_potions"]
+[ext_resource type="Resource" path="res://data/gems/heavy_strike.tres" id="13_heavy"]
+[ext_resource type="Resource" path="res://data/gems/cleave.tres" id="14_cleave"]
+[ext_resource type="Resource" path="res://data/gems/leap_slam.tres" id="15_leap"]
+[ext_resource type="Resource" path="res://data/potions/health_potion.tres" id="16_hp"]
+[ext_resource type="Resource" path="res://data/potions/mana_potion.tres" id="17_mp"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.4
@@ -84,32 +92,50 @@ max_health = 100.0
 script = ExtResource("1_move")
 agent = NodePath("../NavigationAgent3D")
 
-[node name="HeavyStrike" type="Node" parent="."]
+[node name="Mana" type="Node" parent="."]
+script = ExtResource("10_mana")
+max_mana = 50.0
+regen_per_second = 2.0
+
+[node name="Melee" type="Node" parent="." node_paths=PackedStringArray("leap_visual")]
 script = ExtResource("5_melee")
-damage_min = 12.0
-damage_max = 20.0
-reach = 1.6
-windup = 0.22
-recovery = 0.3
+damage_min = 9.0
+damage_max = 15.0
 target_mask = 4
+leap_visual = NodePath("../Visual")
+
+[node name="SkillBar" type="Node" parent="." node_paths=PackedStringArray("mana")]
+script = ExtResource("11_skills")
+mana = NodePath("../Mana")
+known_gems = Array[Resource]([ExtResource("13_heavy"), ExtResource("14_cleave"), ExtResource("15_leap")])
+slots = Array[Resource]([ExtResource("13_heavy"), ExtResource("14_cleave"), ExtResource("15_leap")])
+
+[node name="PotionBelt" type="Node" parent="." node_paths=PackedStringArray("health", "mana")]
+script = ExtResource("12_potions")
+potions = Array[Resource]([ExtResource("16_hp"), ExtResource("17_mp")])
+health = NodePath("../Health")
+mana = NodePath("../Mana")
 
 [node name="ClickMoveInput" type="Node" parent="." node_paths=PackedStringArray("movement")]
 script = ExtResource("2_input")
 movement = NodePath("../NavMovement")
 marker_scene = ExtResource("3_marker")
 
-[node name="PlayerCombat" type="Node" parent="." node_paths=PackedStringArray("movement", "melee", "health")]
+[node name="PlayerCombat" type="Node" parent="." node_paths=PackedStringArray("movement", "melee", "health", "skill_bar")]
 script = ExtResource("6_combat")
 movement = NodePath("../NavMovement")
-melee = NodePath("../HeavyStrike")
+melee = NodePath("../Melee")
 health = NodePath("../Health")
+skill_bar = NodePath("../SkillBar")
 
-[node name="PlayerRespawn" type="Node" parent="." node_paths=PackedStringArray("health", "movement", "melee", "combat", "visual")]
+[node name="PlayerRespawn" type="Node" parent="." node_paths=PackedStringArray("health", "movement", "melee", "combat", "mana", "potions", "visual")]
 script = ExtResource("7_respawn")
 health = NodePath("../Health")
 movement = NodePath("../NavMovement")
-melee = NodePath("../HeavyStrike")
+melee = NodePath("../Melee")
 combat = NodePath("../PlayerCombat")
+mana = NodePath("../Mana")
+potions = NodePath("../PotionBelt")
 visual = NodePath("../Visual")
 
 [node name="HitFeedback" type="Node" parent="." node_paths=PackedStringArray("health", "body_mesh")]
@@ -121,5 +147,5 @@ number_height = 2.3
 
 [node name="SwingAnimator" type="Node" parent="." node_paths=PackedStringArray("melee", "pivot")]
 script = ExtResource("9_swing")
-melee = NodePath("../HeavyStrike")
+melee = NodePath("../Melee")
 pivot = NodePath("../Visual/WeaponPivot")

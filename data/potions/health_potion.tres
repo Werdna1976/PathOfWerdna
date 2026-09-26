@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="PotionData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/potion_data.gd" id="1_potion"]
+
+[resource]
+script = ExtResource("1_potion")
+display_name = "Health Potion"
+restores = 0
+amount = 50.0
+duration = 1.0
+max_charges = 30.0
+charges_per_use = 10.0
+color = Color(0.72, 0.1, 0.08, 1)

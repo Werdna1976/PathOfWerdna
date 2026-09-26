@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SkillGem" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_gem.gd" id="1_gem"]
+
+[resource]
+script = ExtResource("1_gem")
+id = &"leap_slam"
+display_name = "Leap Slam"
+short_name = "Leap"
+description = "Jump to the target location and slam down, hitting every enemy around you."
+tags = Array[StringName]([&"attack", &"melee", &"area", &"movement"])
+mana_cost = 10.0
+cooldown = 1.5
+damage_multiplier = 1.0
+windup = 0.45
+recovery = 0.25
+reach = 2.0
+arc_degrees = 360.0
+hits_all = true
+leap_range = 8.0

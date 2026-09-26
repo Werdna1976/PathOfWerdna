@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SkillGem" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_gem.gd" id="1_gem"]
+
+[resource]
+script = ExtResource("1_gem")
+id = &"cleave"
+display_name = "Cleave"
+short_name = "Cleave"
+description = "A wide swing that hits every enemy in a broad arc in front of you."
+tags = Array[StringName]([&"attack", &"melee", &"area"])
+mana_cost = 5.0
+damage_multiplier = 0.9
+windup = 0.3
+recovery = 0.3
+reach = 2.2
+arc_degrees = 160.0
+hits_all = true
