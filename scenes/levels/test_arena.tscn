@@ -3,6 +3,9 @@
 [ext_resource type="Script" path="res://scripts/systems/runtime_nav_baker.gd" id="1_baker"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
 [ext_resource type="Script" path="res://scripts/components/follow_camera.gd" id="3_camera"]
+[ext_resource type="Script" path="res://scripts/systems/enemy_spawner.gd" id="4_spawner"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/goblin.tscn" id="5_goblin"]
+[ext_resource type="Script" path="res://scripts/systems/hud.gd" id="6_hud"]
 
 [sub_resource type="Environment" id="Environment_dark"]
 background_mode = 1
@@ -342,3 +345,25 @@ far = 200.0
 current = true
 script = ExtResource("3_camera")
 target = NodePath("../Player")
+
+[node name="GoblinSpawner" type="Node3D" parent="."]
+script = ExtResource("4_spawner")
+enemy_scene = ExtResource("5_goblin")
+
+[node name="SpawnA" type="Marker3D" parent="GoblinSpawner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -13)
+
+[node name="SpawnB" type="Marker3D" parent="GoblinSpawner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -15)
+
+[node name="SpawnC" type="Marker3D" parent="GoblinSpawner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -14)
+
+[node name="SpawnD" type="Marker3D" parent="GoblinSpawner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, -11)
+
+[node name="SpawnE" type="Marker3D" parent="GoblinSpawner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 12)
+
+[node name="Hud" type="CanvasLayer" parent="."]
+script = ExtResource("6_hud")

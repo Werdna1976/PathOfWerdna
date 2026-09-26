@@ -3,6 +3,12 @@
 [ext_resource type="Script" path="res://scripts/components/nav_movement.gd" id="1_move"]
 [ext_resource type="Script" path="res://scripts/components/click_move_input.gd" id="2_input"]
 [ext_resource type="PackedScene" path="res://scenes/ui/click_marker.tscn" id="3_marker"]
+[ext_resource type="Script" path="res://scripts/components/health.gd" id="4_health"]
+[ext_resource type="Script" path="res://scripts/components/melee_attack.gd" id="5_melee"]
+[ext_resource type="Script" path="res://scripts/components/player_combat.gd" id="6_combat"]
+[ext_resource type="Script" path="res://scripts/components/player_respawn.gd" id="7_respawn"]
+[ext_resource type="Script" path="res://scripts/components/hit_feedback.gd" id="8_feedback"]
+[ext_resource type="Script" path="res://scripts/components/swing_animator.gd" id="9_swing"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.4
@@ -23,23 +29,41 @@ size = Vector3(0.16, 0.16, 0.36)
 albedo_color = Color(0.75, 0.2, 0.15, 1)
 roughness = 0.6
 
-[node name="Player" type="CharacterBody3D"]
+[sub_resource type="BoxMesh" id="BoxMesh_sword"]
+size = Vector3(0.08, 0.06, 1.3)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sword"]
+albedo_color = Color(0.72, 0.74, 0.78, 1)
+metallic = 0.8
+roughness = 0.35
+
+[node name="Player" type="CharacterBody3D" groups=["player"]]
 collision_layer = 2
-collision_mask = 1
+collision_mask = 5
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_body")
 
-[node name="Body" type="MeshInstance3D" parent="."]
+[node name="Visual" type="Node3D" parent="."]
+
+[node name="Body" type="MeshInstance3D" parent="Visual"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 mesh = SubResource("CapsuleMesh_body")
 material_override = SubResource("StandardMaterial3D_body")
 
-[node name="Nose" type="MeshInstance3D" parent="."]
+[node name="Nose" type="MeshInstance3D" parent="Visual"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, -0.42)
 mesh = SubResource("BoxMesh_nose")
 material_override = SubResource("StandardMaterial3D_nose")
+
+[node name="WeaponPivot" type="Node3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, 0)
+
+[node name="Sword" type="MeshInstance3D" parent="Visual/WeaponPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.0)
+mesh = SubResource("BoxMesh_sword")
+material_override = SubResource("StandardMaterial3D_sword")
 
 [node name="Lantern" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
@@ -52,11 +76,50 @@ path_desired_distance = 0.1
 target_desired_distance = 0.15
 path_height_offset = 0.2
 
+[node name="Health" type="Node" parent="."]
+script = ExtResource("4_health")
+max_health = 100.0
+
 [node name="NavMovement" type="Node" parent="." node_paths=PackedStringArray("agent")]
 script = ExtResource("1_move")
 agent = NodePath("../NavigationAgent3D")
+
+[node name="HeavyStrike" type="Node" parent="."]
+script = ExtResource("5_melee")
+damage_min = 12.0
+damage_max = 20.0
+reach = 1.6
+windup = 0.22
+recovery = 0.3
+target_mask = 4
 
 [node name="ClickMoveInput" type="Node" parent="." node_paths=PackedStringArray("movement")]
 script = ExtResource("2_input")
 movement = NodePath("../NavMovement")
 marker_scene = ExtResource("3_marker")
+
+[node name="PlayerCombat" type="Node" parent="." node_paths=PackedStringArray("movement", "melee", "health")]
+script = ExtResource("6_combat")
+movement = NodePath("../NavMovement")
+melee = NodePath("../HeavyStrike")
+health = NodePath("../Health")
+
+[node name="PlayerRespawn" type="Node" parent="." node_paths=PackedStringArray("health", "movement", "melee", "combat", "visual")]
+script = ExtResource("7_respawn")
+health = NodePath("../Health")
+movement = NodePath("../NavMovement")
+melee = NodePath("../HeavyStrike")
+combat = NodePath("../PlayerCombat")
+visual = NodePath("../Visual")
+
+[node name="HitFeedback" type="Node" parent="." node_paths=PackedStringArray("health", "body_mesh")]
+script = ExtResource("8_feedback")
+health = NodePath("../Health")
+body_mesh = NodePath("../Visual/Body")
+number_color = Color(1, 0.35, 0.3, 1)
+number_height = 2.3
+
+[node name="SwingAnimator" type="Node" parent="." node_paths=PackedStringArray("melee", "pivot")]
+script = ExtResource("9_swing")
+melee = NodePath("../HeavyStrike")
+pivot = NodePath("../Visual/WeaponPivot")

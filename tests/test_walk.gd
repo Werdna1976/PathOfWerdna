@@ -30,6 +30,8 @@ func _run() -> void:
 
 	var arena: Node3D = (load(ARENA_PATH) as PackedScene).instantiate() as Node3D
 	root.add_child(arena)
+	# Goblins would chase and body-block the player; this test is only about pathing.
+	arena.get_node("GoblinSpawner").free()
 	var region: RuntimeNavBaker = arena.get_node("NavigationRegion3D") as RuntimeNavBaker
 	if not region.is_navigation_ready:
 		await region.navigation_ready

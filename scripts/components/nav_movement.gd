@@ -11,6 +11,10 @@ signal destination_reached
 @export var turn_sharpness: float = 14.0
 @export var gravity: float = 20.0
 
+## While locked (e.g. mid-swing) the body holds still but keeps its target,
+## so a move ordered during an attack starts as soon as the attack ends.
+var locked: bool = false
+
 var _moving: bool = false
 
 @onready var _body: CharacterBody3D = get_parent() as CharacterBody3D
@@ -32,7 +36,7 @@ func is_moving() -> bool:
 
 func _physics_process(delta: float) -> void:
 	var velocity: Vector3 = Vector3.ZERO
-	if _moving:
+	if _moving and not locked:
 		velocity = _step_velocity(delta)
 	velocity.y = 0.0 if _body.is_on_floor() else _body.velocity.y - gravity * delta
 	_body.velocity = velocity
