@@ -1,0 +1,344 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/runtime_nav_baker.gd" id="1_baker"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
+[ext_resource type="Script" path="res://scripts/components/follow_camera.gd" id="3_camera"]
+
+[sub_resource type="Environment" id="Environment_dark"]
+background_mode = 1
+background_color = Color(0.01, 0.012, 0.02, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.3, 0.36, 0.52, 1)
+ambient_light_energy = 0.35
+tonemap_mode = 3
+tonemap_white = 6.0
+glow_enabled = true
+glow_intensity = 0.6
+glow_bloom = 0.05
+fog_enabled = true
+fog_light_color = Color(0.035, 0.045, 0.07, 1)
+fog_density = 0.008
+fog_sky_affect = 0.0
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.015
+volumetric_fog_albedo = Color(0.6, 0.68, 0.85, 1)
+volumetric_fog_emission = Color(0.006, 0.008, 0.014, 1)
+volumetric_fog_length = 80.0
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_arena"]
+geometry_parsed_geometry_type = 1
+geometry_collision_mask = 1
+cell_height = 0.1
+agent_height = 2.0
+agent_max_climb = 0.3
+agent_radius = 0.5
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_floor"]
+frequency = 0.04
+fractal_octaves = 4
+
+[sub_resource type="Gradient" id="Gradient_floor"]
+colors = PackedColorArray(0.6, 0.6, 0.6, 1, 1, 1, 1, 1)
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_floor"]
+width = 256
+height = 256
+seamless = true
+color_ramp = SubResource("Gradient_floor")
+noise = SubResource("FastNoiseLite_floor")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_color = Color(0.45, 0.45, 0.48, 1)
+albedo_texture = SubResource("NoiseTexture2D_floor")
+roughness = 0.95
+uv1_scale = Vector3(6, 6, 6)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
+albedo_color = Color(0.1, 0.1, 0.12, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_stone"]
+albedo_color = Color(0.32, 0.32, 0.34, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_crate"]
+albedo_color = Color(0.3, 0.2, 0.12, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_flame"]
+shading_mode = 0
+albedo_color = Color(1, 0.62, 0.25, 1)
+disable_receive_shadows = true
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(40, 1, 40)
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+size = Vector3(40, 1, 40)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ns"]
+size = Vector3(41, 3, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_ns"]
+size = Vector3(41, 3, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ew"]
+size = Vector3(1, 3, 40)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_ew"]
+size = Vector3(1, 3, 40)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_center"]
+size = Vector3(8, 3, 1.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_center"]
+size = Vector3(8, 3, 1.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cube"]
+size = Vector3(3, 3, 3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cube"]
+size = Vector3(3, 3, 3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_long"]
+size = Vector3(4, 3, 2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_long"]
+size = Vector3(4, 3, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_small"]
+size = Vector3(2.5, 3, 2.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_small"]
+size = Vector3(2.5, 3, 2.5)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_pillar"]
+height = 4.0
+radius = 0.6
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pillar"]
+top_radius = 0.6
+bottom_radius = 0.6
+height = 4.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_flame"]
+radius = 0.14
+height = 0.28
+radial_segments = 12
+rings = 6
+
+[node name="TestArena" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_dark")
+
+[node name="Moonlight" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.95, -0.5, 0)
+light_color = Color(0.55, 0.65, 0.95, 1)
+light_energy = 0.25
+light_volumetric_fog_energy = 0.3
+shadow_enabled = true
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_arena")
+script = ExtResource("1_baker")
+
+[node name="Floor" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Floor"]
+shape = SubResource("BoxShape3D_floor")
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/Floor"]
+mesh = SubResource("BoxMesh_floor")
+material_override = SubResource("StandardMaterial3D_floor")
+
+[node name="WallNorth" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -20)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallNorth"]
+shape = SubResource("BoxShape3D_wall_ns")
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/WallNorth"]
+mesh = SubResource("BoxMesh_wall_ns")
+material_override = SubResource("StandardMaterial3D_wall")
+
+[node name="WallSouth" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 20)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallSouth"]
+shape = SubResource("BoxShape3D_wall_ns")
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/WallSouth"]
+mesh = SubResource("BoxMesh_wall_ns")
+material_override = SubResource("StandardMaterial3D_wall")
+
+[node name="WallEast" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 1.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallEast"]
+shape = SubResource("BoxShape3D_wall_ew")
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/WallEast"]
+mesh = SubResource("BoxMesh_wall_ew")
+material_override = SubResource("StandardMaterial3D_wall")
+
+[node name="WallWest" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 1.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallWest"]
+shape = SubResource("BoxShape3D_wall_ew")
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/WallWest"]
+mesh = SubResource("BoxMesh_wall_ew")
+material_override = SubResource("StandardMaterial3D_wall")
+
+[node name="CenterWall" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/CenterWall"]
+shape = SubResource("BoxShape3D_center")
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/CenterWall"]
+mesh = SubResource("BoxMesh_center")
+material_override = SubResource("StandardMaterial3D_stone")
+
+[node name="CrateA" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 1.5, -7)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/CrateA"]
+shape = SubResource("BoxShape3D_cube")
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/CrateA"]
+mesh = SubResource("BoxMesh_cube")
+material_override = SubResource("StandardMaterial3D_crate")
+
+[node name="CrateB" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1.5, -9)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/CrateB"]
+shape = SubResource("BoxShape3D_long")
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/CrateB"]
+mesh = SubResource("BoxMesh_long")
+material_override = SubResource("StandardMaterial3D_crate")
+
+[node name="CrateC" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 1.5, 7)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/CrateC"]
+shape = SubResource("BoxShape3D_small")
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/CrateC"]
+mesh = SubResource("BoxMesh_small")
+material_override = SubResource("StandardMaterial3D_crate")
+
+[node name="CrateD" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 1.5, 9)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/CrateD"]
+shape = SubResource("BoxShape3D_cube")
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/CrateD"]
+mesh = SubResource("BoxMesh_cube")
+material_override = SubResource("StandardMaterial3D_stone")
+
+[node name="PillarNW" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 2, 3)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/PillarNW"]
+shape = SubResource("CylinderShape3D_pillar")
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/PillarNW"]
+mesh = SubResource("CylinderMesh_pillar")
+material_override = SubResource("StandardMaterial3D_stone")
+
+[node name="PillarSE" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 2, 4)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/PillarSE"]
+shape = SubResource("CylinderShape3D_pillar")
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/PillarSE"]
+mesh = SubResource("CylinderMesh_pillar")
+material_override = SubResource("StandardMaterial3D_stone")
+
+[node name="PillarW" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 2, 1)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/PillarW"]
+shape = SubResource("CylinderShape3D_pillar")
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/PillarW"]
+mesh = SubResource("CylinderMesh_pillar")
+material_override = SubResource("StandardMaterial3D_stone")
+
+[node name="PillarE" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 2, -2)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/PillarE"]
+shape = SubResource("CylinderShape3D_pillar")
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/PillarE"]
+mesh = SubResource("CylinderMesh_pillar")
+material_override = SubResource("StandardMaterial3D_stone")
+
+[node name="Torches" type="Node3D" parent="."]
+
+[node name="TorchNW" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.2, 2.6, 3)
+light_color = Color(1, 0.58, 0.26, 1)
+light_energy = 4.5
+omni_range = 10.0
+shadow_enabled = true
+
+[node name="Flame" type="MeshInstance3D" parent="Torches/TorchNW"]
+cast_shadow = 0
+mesh = SubResource("SphereMesh_flame")
+material_override = SubResource("StandardMaterial3D_flame")
+
+[node name="TorchSE" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2, 2.6, 4)
+light_color = Color(1, 0.58, 0.26, 1)
+light_energy = 4.5
+omni_range = 10.0
+shadow_enabled = true
+
+[node name="Flame" type="MeshInstance3D" parent="Torches/TorchSE"]
+cast_shadow = 0
+mesh = SubResource("SphereMesh_flame")
+material_override = SubResource("StandardMaterial3D_flame")
+
+[node name="TorchW" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.2, 2.6, 1)
+light_color = Color(1, 0.58, 0.26, 1)
+light_energy = 4.5
+omni_range = 10.0
+shadow_enabled = true
+
+[node name="Flame" type="MeshInstance3D" parent="Torches/TorchW"]
+cast_shadow = 0
+mesh = SubResource("SphereMesh_flame")
+material_override = SubResource("StandardMaterial3D_flame")
+
+[node name="TorchE" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.2, 2.6, -2)
+light_color = Color(1, 0.58, 0.26, 1)
+light_energy = 4.5
+omni_range = 10.0
+shadow_enabled = true
+
+[node name="Flame" type="MeshInstance3D" parent="Torches/TorchE"]
+cast_shadow = 0
+mesh = SubResource("SphereMesh_flame")
+material_override = SubResource("StandardMaterial3D_flame")
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+
+[node name="Camera" type="Camera3D" parent="." node_paths=PackedStringArray("target")]
+fov = 35.0
+far = 200.0
+current = true
+script = ExtResource("3_camera")
+target = NodePath("../Player")
