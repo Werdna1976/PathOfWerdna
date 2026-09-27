@@ -43,6 +43,8 @@ const SUPPORT_GEM_COLOR: Color = Color(0.95, 0.55, 0.5)
 
 ## Reports problems (e.g. "Chaos needs a rare item") for the HUD to show.
 signal message(text: String)
+## Emitted when a gem goes into a socket.
+signal gem_socketed(gem: Item)
 
 var inventory: Inventory
 var equipment: Equipment
@@ -222,7 +224,9 @@ func skill_estimate_for(gem_item: Item) -> Dictionary:
 ## Clicking socket `index` of `item`: socket the held gem (swapping), or take the gem out.
 func click_socket(item: Item, index: int) -> void:
 	if held != null and held.base.is_gem():
-		held = item.socket_gem(index, held)
+		var gem: Item = held
+		held = item.socket_gem(index, gem)
+		gem_socketed.emit(gem)
 	elif held == null and item.socketed_gem(index) != null:
 		held = item.socket_gem(index, null)
 	else:

@@ -1,0 +1,107 @@
+{
+	"_notes": "Layered sound recipes. Playing a recipe plays every layer at once. Each layer picks one random file matching its pattern (paths are relative to res://assets/audio/, * is a wildcard), at `db` volume and a random pitch within `pitch` [min, max]. A recipe with the same id as a file in sfx/ replaces it. Tune by ear: pitch below 1 makes a sound heavier and deeper; db 0 is the sample's own level.",
+	"recipes": {
+		"hit_sword": [
+			{ "files": "samples/kenney_rpg/knifeSlice*", "db": 0, "pitch": [0.95, 1.1] },
+			{ "files": "samples/kenney_impact/impactPunch_medium_*", "db": -5, "pitch": [1.0, 1.15] },
+			{ "files": "samples/starninjas_clash/sword_clash.*", "db": -17, "pitch": [1.05, 1.2] }
+		],
+		"hit_axe": [
+			{ "files": "samples/kenney_rpg/chop*", "db": 0, "pitch": [0.8, 0.95] },
+			{ "files": "samples/kenney_impact/impactPunch_heavy_*", "db": -3, "pitch": [0.85, 0.95] },
+			{ "files": "samples/kenney_rpg/knifeSlice*", "db": -10, "pitch": [0.75, 0.85] }
+		],
+		"hit_mace": [
+			{ "files": "samples/kenney_impact/impactPunch_heavy_*", "db": 0, "pitch": [0.65, 0.78] },
+			{ "files": "samples/kenney_impact/impactSoft_heavy_*", "db": -2, "pitch": [0.7, 0.8] },
+			{ "files": "samples/kenney_impact/impactPlank_medium_*", "db": -9, "pitch": [0.55, 0.65] }
+		],
+		"hit_dagger": [
+			{ "files": "samples/kenney_rpg/knifeSlice*", "db": -1, "pitch": [1.2, 1.35] },
+			{ "files": "samples/kenney_impact/impactSoft_medium_*", "db": -6, "pitch": [1.2, 1.35] }
+		],
+		"hit_club": [
+			{ "files": "samples/kenney_impact/impactWood_medium_*", "db": -3, "pitch": [0.75, 0.9] },
+			{ "files": "samples/kenney_impact/impactPunch_medium_*", "db": -4, "pitch": [0.85, 0.95] }
+		],
+		"hit_fist": [
+			{ "files": "samples/kenney_impact/impactPunch_medium_*", "db": 0, "pitch": [0.9, 1.05] }
+		],
+		"hit_armour_layer": [
+			{ "files": "samples/kenney_impact/impactPlate_medium_*", "db": -5, "pitch": [0.8, 0.95] }
+		],
+		"hit_crit_layer": [
+			{ "files": "samples/kenney_impact/impactPunch_heavy_*", "db": 0, "pitch": [0.6, 0.7] },
+			{ "files": "samples/kenney_impact/impactMetal_heavy_*", "db": -14, "pitch": [0.5, 0.6] }
+		],
+		"block": [
+			{ "files": "samples/kenney_impact/impactPlate_heavy_*", "db": -1, "pitch": [0.85, 0.95] },
+			{ "files": "samples/kenney_impact/impactWood_heavy_*", "db": -6, "pitch": [0.75, 0.85] }
+		],
+
+		"swing_sword": [
+			{ "files": "sfx/swing_*", "db": -5, "pitch": [1.05, 1.2] },
+			{ "files": "samples/starninjas_sword/sword.*", "db": -15, "pitch": [1.0, 1.1] }
+		],
+		"swing_axe": [
+			{ "files": "sfx/swing_*", "db": -3, "pitch": [0.85, 0.95] }
+		],
+		"swing_mace": [
+			{ "files": "sfx/swing_*", "db": -2, "pitch": [0.7, 0.8] }
+		],
+		"swing_dagger": [
+			{ "files": "sfx/swing_*", "db": -6, "pitch": [1.3, 1.45] }
+		],
+		"swing_club": [
+			{ "files": "sfx/swing_*", "db": -8, "pitch": [0.75, 0.85] }
+		],
+		"swing_fist": [
+			{ "files": "sfx/swing_*", "db": -8, "pitch": [1.15, 1.25] }
+		],
+
+		"footstep_dirt": [
+			{ "files": "samples/kenney_impact/footstep_grass_*", "db": -4, "pitch": [0.9, 1.05] }
+		],
+		"footstep_sand": [
+			{ "files": "samples/kenney_impact/footstep_snow_*", "db": -5, "pitch": [0.85, 0.95] }
+		],
+
+		"equip_plate": [
+			{ "files": "samples/kenney_rpg/metalLatch*", "db": -9, "pitch": [0.7, 0.78] },
+			{ "files": "samples/kenney_rpg/cloth?.ogg", "db": -10, "pitch": [0.8, 0.9] }
+		],
+		"equip_leather": [
+			{ "files": "samples/kenney_rpg/handleSmallLeather*", "db": -6, "pitch": [0.8, 0.9] },
+			{ "files": "samples/kenney_rpg/dropLeather*", "db": -12, "pitch": [0.8, 0.9] }
+		],
+		"equip_cloth": [
+			{ "files": "samples/kenney_rpg/cloth?.ogg", "db": -6, "pitch": [0.8, 0.9] },
+			{ "files": "samples/kenney_rpg/clothBelt*", "db": -12, "pitch": [0.85, 0.95] }
+		],
+		"equip_blade": [
+			{ "files": "samples/kenney_rpg/drawKnife*", "db": -10, "pitch": [0.68, 0.76] },
+			{ "files": "samples/kenney_rpg/clothBelt*", "db": -12, "pitch": [0.85, 0.95] }
+		],
+		"equip_blunt": [
+			{ "files": "samples/kenney_impact/impactWood_light_*", "db": -9, "pitch": [0.65, 0.75] },
+			{ "files": "samples/kenney_rpg/beltHandle*", "db": -11, "pitch": [0.8, 0.9] }
+		],
+		"equip_shield": [
+			{ "files": "samples/kenney_impact/impactPlank_medium_*", "db": -10, "pitch": [0.7, 0.8] },
+			{ "files": "samples/kenney_rpg/beltHandle*", "db": -12, "pitch": [0.8, 0.9] }
+		],
+		"equip_trinket": [
+			{ "files": "samples/kenney_rpg/clothBelt*", "db": -9, "pitch": [0.7, 0.8] }
+		],
+		"socket_gem": [
+			{ "files": "samples/kenney_rpg/metalClick*", "db": -14, "pitch": [0.6, 0.66] },
+			{ "files": "samples/kenney_rpg/cloth?.ogg", "db": -16, "pitch": [0.8, 0.9] }
+		],
+		"inventory_open": [
+			{ "files": "samples/kenney_rpg/cloth?.ogg", "db": -9, "pitch": [0.75, 0.85] }
+		],
+		"inventory_close": [
+			{ "files": "samples/kenney_rpg/clothBelt*", "db": -11, "pitch": [0.7, 0.8] }
+		]
+	}
+}

@@ -53,6 +53,8 @@ func _run() -> void:
 		var stream: AudioStreamWAV = audio.load_loop(audio.AMBIENCE_DIR, StringName(loop)) as AudioStreamWAV
 		_check("ambience '%s' loads and loops" % loop, stream != null and stream.loop_mode != AudioStreamWAV.LOOP_DISABLED)
 
+	_check_recipes(audio)
+
 	# In the game, zones pick their music and ambience.
 	var game: Game = (load("res://scenes/main.tscn") as PackedScene).instantiate() as Game
 	root.add_child(game)
@@ -65,10 +67,57 @@ func _run() -> void:
 		await physics_frame
 	_check("the Shore crossfades to its music and sea ambience",
 		audio.current_music == &"shore" and audio.current_ambience == &"sea" and audio.footstep_surface == "sand")
+	await physics_frame
+	var player_melee: MeleeAttack = game.player.get_node("Melee") as MeleeAttack
+	_check("Werdna's hatchet plays axe hits and swings", audio.weapon_class(player_melee) == "axe")
+	var goblins: Array[Node] = game.get_tree().get_nodes_in_group("enemies")
+	_check("goblins (no gear) hit with club sounds", not goblins.is_empty()
+		and audio.weapon_class(goblins[0].get_node("Attack") as MeleeAttack) == "club")
+	var equipment: Equipment = game.player.get_node("Equipment") as Equipment
+	var fired: Array[Item] = []
+	equipment.item_equipped.connect(func(item: Item, _slot: StringName) -> void: fired.append(item))
+	var boots: Item = ItemGenerator.new().generate(ItemDB.base(&"iron_greaves"), 1, Item.Rarity.NORMAL)
+	equipment.equip(boots, &"boots")
+	_check("equipping gear signals which item went on", fired == [boots])
 	game.queue_free()
 	await process_frame
 	print("RESULT: %s (%d failure(s))" % ["PASS" if _failures == 0 else "FAIL", _failures])
 	quit(0 if _failures == 0 else 1)
+
+
+## Every sample recipe resolves its files, loads them, and plays; each
+## weapon class has a hit and a swing; equip sounds map by item type.
+func _check_recipes(audio: Node) -> void:
+	var empty: Array[String] = []
+	var broken: Array[String] = []
+	for id: StringName in audio._recipes:
+		for layer: Dictionary in audio._recipes[id]:
+			if (layer["files"] as Array).is_empty():
+				empty.append(String(id))
+		for path: Variant in audio.recipe_files(id):
+			var stream: AudioStream = path if path is AudioStream else load(path)
+			if stream == null or stream.get_length() <= 0.0:
+				broken.append(String(id))
+	_check("every recipe layer matches sample files %s" % [empty], empty.is_empty())
+	_check("every recipe sample loads %s" % [broken], broken.is_empty())
+	var missing: Array[String] = []
+	for kind: String in ["sword", "axe", "mace", "dagger", "club", "fist"]:
+		for prefix: String in ["hit_", "swing_"]:
+			if not audio.has_recipe(StringName(prefix + kind)):
+				missing.append(prefix + kind)
+	_check("each weapon class has a hit and a swing %s" % [missing], missing.is_empty())
+	var hit: Node = audio.play(&"hit_mace", Vector3.ZERO)
+	_check("playing a recipe starts a sample", hit != null and hit.get("stream") != null)
+	var gen := ItemGenerator.new()
+	var cases: Dictionary = {&"plate_vest": &"equip_plate", &"shabby_jerkin": &"equip_leather",
+		&"simple_robe": &"equip_cloth", &"rusted_sword": &"equip_blade", &"driftwood_club": &"equip_blunt",
+		&"goathide_buckler": &"equip_shield", &"coral_ring": &"equip_trinket", &"bone_charm": &"equip_trinket"}
+	var wrong: Array[String] = []
+	for base_id: StringName in cases:
+		var sound: StringName = audio.equip_sound(gen.generate(ItemDB.base(base_id), 1, Item.Rarity.NORMAL))
+		if sound != cases[base_id] or not audio.has_recipe(sound):
+			wrong.append("%s->%s" % [base_id, sound])
+	_check("equip sounds follow the item type %s" % [wrong], wrong.is_empty())
 
 
 func _check(label: String, ok: bool) -> void:

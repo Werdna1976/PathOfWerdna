@@ -6,6 +6,9 @@ extends Node
 ## Off hands hold shields only for now (no dual wielding yet).
 
 signal changed
+## Emitted when a specific item goes on or comes off (for sounds and effects).
+signal item_equipped(item: Item, slot: StringName)
+signal item_unequipped(item: Item, slot: StringName)
 
 const SLOTS: Array[StringName] = [&"main_hand", &"off_hand", &"helm", &"chest", &"gloves",
 	&"boots", &"ring_left", &"ring_right", &"amulet", &"charm"]
@@ -106,6 +109,7 @@ func equip(item: Item, slot: StringName) -> Array[Item]:
 		displaced.append(main)
 		_items.erase(&"main_hand")
 	_items[slot] = item
+	item_equipped.emit(item, slot)
 	changed.emit()
 	return displaced
 
@@ -119,5 +123,6 @@ func unequip(slot: StringName) -> Item:
 	var item: Item = _items.get(slot)
 	if item != null:
 		_items.erase(slot)
+		item_unequipped.emit(item, slot)
 		changed.emit()
 	return item
