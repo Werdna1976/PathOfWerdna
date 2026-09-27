@@ -19,7 +19,7 @@ const SFX_DIR: String = "res://assets/audio/sfx/"
 const MUSIC_DIR: String = "res://assets/audio/music/"
 const AMBIENCE_DIR: String = "res://assets/audio/ambience/"
 ## Default bus volumes: music sits well under the effects.
-const BUSES: Dictionary = {&"Music": -13.0, &"SFX": -2.0, &"Ambience": -10.0}
+const BUSES: Dictionary = {&"Music": -3.0, &"SFX": -2.0, &"Ambience": -12.0}
 const POOL_3D: int = 16
 const POOL_2D: int = 8
 const FADE_TIME: float = 2.5
