@@ -44,6 +44,11 @@ func show_item(item: Item, detailed: bool = false) -> void:
 	_separator()
 	_add(item.base.type_name(), LABEL_COLOR)
 
+	if item.base.is_gem():
+		_show_gem(item)
+		_finish()
+		return
+
 	if item.base.is_currency():
 		_add("Stack Size: %d / %d" % [item.stack, item.base.max_stack], VALUE_COLOR)
 		if item.base.description != "":
@@ -64,7 +69,11 @@ func show_item(item: Item, detailed: bool = false) -> void:
 	if stats.has("block"):
 		_add("Chance to Block: %d%%" % stats["block"], VALUE_COLOR)
 	if item.sockets > 0:
-		_add("Sockets: %s" % "o ".repeat(item.sockets).strip_edges(), VALUE_COLOR)
+		var names: PackedStringArray = []
+		for i: int in item.sockets:
+			var g: Item = item.socketed_gem(i)
+			names.append("[%s]" % ((g.gem as GemData).short_name if g != null else "  "))
+		_add("Sockets: %s" % " ".join(names), VALUE_COLOR)
 	_add("Item Level: %d" % item.ilvl, LABEL_COLOR)
 
 	if item.implicit_text() != "":
@@ -87,6 +96,32 @@ func show_item(item: Item, detailed: bool = false) -> void:
 						tier, def.tiers[roll["tier"]]["name"]]
 				_add(text, AFFIX_COLOR)
 	_finish()
+
+
+func _show_gem(item: Item) -> void:
+	var gem: GemData = item.gem
+	var is_support: bool = gem is SupportGem
+	_add("Support Gem" if is_support else "Active Skill Gem", LABEL_COLOR)
+	_add(", ".join(PackedStringArray(gem.tags.map(func(t: StringName) -> String: return String(t).capitalize()))), LABEL_COLOR)
+	_add("Level: %d" % item.gem_level, VALUE_COLOR)
+	_separator()
+	if is_support:
+		var support: SupportGem = gem as SupportGem
+		_add("Mana Cost Multiplier: %d%%" % roundi(support.mana_multiplier * 100.0), VALUE_COLOR)
+		_add("Supports: %s skills" % ", ".join(PackedStringArray(support.supported_tags.map(
+			func(t: StringName) -> String: return String(t).capitalize()))), VALUE_COLOR)
+		_separator()
+		for line: String in support.effect_lines:
+			_add(line, AFFIX_COLOR)
+	else:
+		var skill: SkillGem = gem as SkillGem
+		_add("Mana Cost: %d" % skill.mana_cost, VALUE_COLOR)
+		if skill.cooldown > 0.0:
+			_add("Cooldown: %.1f sec" % skill.cooldown, VALUE_COLOR)
+		_add("Deals %d%% of Base Damage" % roundi(skill.damage_multiplier * 100.0), AFFIX_COLOR)
+	_separator()
+	_add(gem.description, LABEL_COLOR)
+	_add("Place into an item socket to use it. Supports affect active gems in the same item.", LABEL_COLOR, 12)
 
 
 ## Values raised by the item's own mods show in the affix colour, as in PoE.

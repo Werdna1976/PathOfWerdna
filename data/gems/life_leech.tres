@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SupportGem" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/support_gem.gd" id="1_gem"]
+
+[resource]
+script = ExtResource("1_gem")
+id = &"life_leech"
+display_name = "Life Leech Support"
+short_name = "Leech"
+description = "Supports attack skills, healing you for part of the damage they deal."
+tags = Array[StringName]([&"support"])
+supported_tags = Array[StringName]([&"attack"])
+mana_multiplier = 1.1
+leech_percent = 5.0
+effect_lines = Array[String](["5% of Damage dealt by supported skills is gained as Life"])

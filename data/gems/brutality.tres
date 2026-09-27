@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SupportGem" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/support_gem.gd" id="1_gem"]
+
+[resource]
+script = ExtResource("1_gem")
+id = &"brutality"
+display_name = "Brutality Support"
+short_name = "Brutality"
+description = "Supports attack skills, greatly increasing physical damage at the cost of all elemental damage."
+tags = Array[StringName]([&"support", &"physical"])
+supported_tags = Array[StringName]([&"attack"])
+mana_multiplier = 1.2
+more_physical = 40.0
+no_elemental = true
+effect_lines = Array[String](["Supported skills deal 40% more Physical Damage", "Supported skills deal no Elemental Damage"])

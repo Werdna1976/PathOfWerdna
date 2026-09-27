@@ -230,8 +230,8 @@ res://
 4. **Loot**, split into three parts:
    - **4a, items and drops:** item levels, bases, affix rolling, drops, ground labels and pickup. *(Done.)*
    - **4b, inventory and equipment:** the inventory screen, equipping the 10 slots, and gear stats applying to Werdna. *(Done.)*
-   - **4c, sockets and gems:** socketing gems, support gems, and the skill bar drawing from socketed gems.
-5. **Progression:** XP, levels, attributes and the warrior region of the skill tree.
+   - **4c, sockets and gems:** socketing gems, support gems, and the skill bar drawing from socketed gems. *(Done. Gem XP moved to Milestone 5.)*
+5. **Progression:** XP, levels, gem XP and levels, attributes, and the warrior region of the skill tree.
 6. **Content:** more enemies, a boss, a town hub and procedural map pieces.
 
 ## Future polish

@@ -274,6 +274,7 @@ func _test_drop_and_pickup() -> void:
 
 	var pickup: ItemPickup = player.get_node("ItemPickup") as ItemPickup
 	var inventory: Inventory = player.get_node("Inventory") as Inventory
+	inventory.entries.clear()  # drop the starting gems so only picked-up items count
 	for node: Node in grounds:
 		pickup.request(node as GroundItem)
 		for i: int in 240:

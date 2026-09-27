@@ -6,6 +6,9 @@ extends Control
 ##   place it, swap with the item under it, or equip it into a slot.
 ## - Right click an item in the grid to equip it; right click gear to unequip.
 ## - Left click the world while holding an item to drop it on the ground.
+## - Sockets are the circles on items. Holding a gem, click a socket to put it
+##   in (swapping any gem already there); with nothing held, click a filled
+##   socket to take its gem out. Solid dots are active gems; rings are supports.
 ## Everything is drawn in _draw(); items are coloured boxes with their names.
 
 const CELL: float = 40.0
@@ -30,6 +33,10 @@ const SLOT_COLOR: Color = Color(0.1, 0.09, 0.08)
 const CELL_LINE: Color = Color(0.2, 0.18, 0.15)
 const VALID_COLOR: Color = Color(0.2, 0.6, 0.2, 0.35)
 const INVALID_COLOR: Color = Color(0.7, 0.15, 0.1, 0.35)
+const SOCKET_RADIUS: float = 9.0
+const SOCKET_COLOR: Color = Color(0.55, 0.5, 0.45)
+const ACTIVE_GEM_COLOR: Color = Color(0.85, 0.25, 0.2)
+const SUPPORT_GEM_COLOR: Color = Color(0.95, 0.55, 0.5)
 
 var inventory: Inventory
 var equipment: Equipment
@@ -118,7 +125,54 @@ func held_grid_pos(local: Vector2) -> Vector2i:
 	return grid_cell_at(top_left)
 
 
+## Centre of socket `index` for an item drawn in `r`: two per row, centred.
+func socket_center(item: Item, r: Rect2, index: int) -> Vector2:
+	var columns: int = mini(item.base.size.x, 2)
+	var rows: int = ceili(float(item.sockets) / columns)
+	var top: float = (r.size.y - rows * CELL) * 0.5 + CELL * 0.5
+	var left: float = (r.size.x - columns * CELL) * 0.5 + CELL * 0.5
+	return r.position + Vector2(left + (index % columns) * CELL, top + (index / columns) * CELL)
+
+
+## The item under `local` (grid or equipment) and where it's drawn: {item, rect}, or {}.
+func item_at(local: Vector2) -> Dictionary:
+	var slot: StringName = slot_at(local)
+	if slot != &"":
+		var equipped: Item = equipment.get_item(slot)
+		return {"item": equipped, "rect": slot_rect(slot)} if equipped != null else {}
+	var entry: Dictionary = inventory.entry_at(grid_cell_at(local))
+	if entry.is_empty() or not Rect2(grid_origin(), Vector2(Inventory.WIDTH, Inventory.HEIGHT) * CELL).has_point(local):
+		return {}
+	var item: Item = entry["item"]
+	return {"item": item, "rect": Rect2(grid_origin() + Vector2(entry["pos"]) * CELL, Vector2(item.base.size) * CELL)}
+
+
+## The socket index under `local` on the item there, or -1.
+func socket_at(local: Vector2) -> int:
+	var hit: Dictionary = item_at(local)
+	if hit.is_empty():
+		return -1
+	var item: Item = hit["item"]
+	for i: int in item.sockets:
+		if socket_center(item, hit["rect"], i).distance_to(local) <= SOCKET_RADIUS + 4.0:
+			return i
+	return -1
+
+
 # --- Actions (also used by tests) ----------------------------------------------
+
+## Clicking socket `index` of `item`: socket the held gem (swapping), or take the gem out.
+func click_socket(item: Item, index: int) -> void:
+	if held != null and held.base.is_gem():
+		held = item.socket_gem(index, held)
+	elif held == null and item.socketed_gem(index) != null:
+		held = item.socket_gem(index, null)
+	else:
+		return
+	if equipment.slot_of(item) != &"":
+		equipment.notify_changed()
+	queue_redraw()
+
 
 ## Left click at a grid cell: pick up, place, or swap.
 func click_grid(cell: Vector2i) -> void:
@@ -221,8 +275,12 @@ func _gui_input(event: InputEvent) -> void:
 	var slot: StringName = slot_at(local)
 	var cell: Vector2i = held_grid_pos(local) if held != null else grid_cell_at(local)
 	var in_grid: bool = Rect2(grid_origin(), Vector2(Inventory.WIDTH, Inventory.HEIGHT) * CELL).has_point(local)
+	var socket: int = socket_at(local)
+	var socket_ok: bool = socket >= 0 and ((held != null and held.base.is_gem()) 		or (held == null and (item_at(local)["item"] as Item).socketed_gem(socket) != null))
 	if click.button_index == MOUSE_BUTTON_LEFT:
-		if slot != &"":
+		if socket_ok:
+			click_socket(item_at(local)["item"], socket)
+		elif slot != &"":
 			click_slot(slot)
 		elif in_grid:
 			click_grid(cell)
@@ -308,13 +366,24 @@ func _draw_item(item: Item, r: Rect2, alpha: float = 1.0) -> void:
 	var label: String = item.base.name
 	if item.base.is_currency():
 		label = str(item.stack)
-	var font_size: int = 11 if r.size.x > CELL else 10
+	elif item.base.is_gem():
+		label = (item.gem as GemData).short_name
+	var font_size: int = 11 if r.size.x > CELL else 8
 	draw_multiline_string(_font, inner.position + Vector2(3.0, 13.0), label, HORIZONTAL_ALIGNMENT_CENTER,
 		inner.size.x - 6.0, font_size, 4, Color(color, alpha))
-	if item.sockets > 0:
-		var dots: String = "o".repeat(item.sockets)
-		draw_string(_font, inner.position + Vector2(3.0, inner.size.y - 4.0), dots, HORIZONTAL_ALIGNMENT_CENTER,
-			inner.size.x - 6.0, 11, Color(0.7, 0.7, 0.7, alpha))
+	for i: int in item.sockets:
+		_draw_socket(socket_center(item, r, i), item.socketed_gem(i), alpha)
+
+
+func _draw_socket(center: Vector2, gem_item: Item, alpha: float) -> void:
+	draw_circle(center, SOCKET_RADIUS, Color(0.03, 0.03, 0.03, alpha))
+	draw_arc(center, SOCKET_RADIUS, 0.0, TAU, 20, Color(SOCKET_COLOR, alpha), 1.5)
+	if gem_item == null:
+		return
+	if gem_item.gem is SupportGem:
+		draw_arc(center, SOCKET_RADIUS - 3.0, 0.0, TAU, 20, Color(SUPPORT_GEM_COLOR, alpha), 3.0)
+	else:
+		draw_circle(center, SOCKET_RADIUS - 2.5, Color(ACTIVE_GEM_COLOR, alpha))
 
 
 func _update_tooltip() -> void:
@@ -322,14 +391,12 @@ func _update_tooltip() -> void:
 		_tooltip.visible = false
 		return
 	var local: Vector2 = get_local_mouse_position()
-	var item: Item = null
-	var slot: StringName = slot_at(local)
-	if slot != &"":
-		item = equipment.get_item(slot)
-	else:
-		var entry: Dictionary = inventory.entry_at(grid_cell_at(local))
-		if not entry.is_empty() and Rect2(Vector2.ZERO, size).has_point(local):
-			item = entry["item"]
+	var hit: Dictionary = item_at(local)
+	var item: Item = hit.get("item")
+	# Hovering a filled socket shows that gem instead of the item.
+	var socket: int = socket_at(local)
+	if socket >= 0 and item.socketed_gem(socket) != null:
+		item = item.socketed_gem(socket)
 	if item == null:
 		_tooltip.visible = false
 		return

@@ -3,7 +3,7 @@ extends Node
 ## A timed melee swing. The body snaps to face the swing direction, and after
 ## the wind-up the closest living target inside a forward arc takes damage.
 ##
-## Called with a SkillGem, the gem supplies timing, reach, arc and a damage
+## Called with a SkillInstance (a gem plus its supports), the skill supplies timing, reach, arc and a damage
 ## multiplier on top of this node's base (weapon) damage. It can hit every
 ## target in the area, and leap skills carry the body to a landing point
 ## during the wind-up. Without a gem the exported values are used, which is
@@ -17,9 +17,12 @@ enum Phase { IDLE, WINDUP, RECOVERY }
 
 const LEAP_HEIGHT: float = 1.6
 
-## Base damage per hit (the weapon roll).
+## Base physical damage per hit (the weapon roll).
 @export var damage_min: float = 10.0
 @export var damage_max: float = 15.0
+## Added fire damage per hit (from gear).
+@export var fire_min: float = 0.0
+@export var fire_max: float = 0.0
 ## How far past the attacker's centre a target's collider can be and still be hit.
 @export var reach: float = 1.6
 @export_range(0.0, 360.0) var arc_degrees: float = 110.0
@@ -45,7 +48,7 @@ var culling_percent: float = 0.0
 
 var _phase: Phase = Phase.IDLE
 var _time_left: float = 0.0
-var _skill: SkillGem
+var _skill: SkillInstance
 var _leap_from: Vector3
 var _leap_to: Vector3 = Vector3.INF
 
@@ -57,7 +60,7 @@ func is_busy() -> bool:
 
 
 ## The gem being used, or null for a plain (enemy) swing.
-func current_skill() -> SkillGem:
+func current_skill() -> SkillInstance:
 	return _skill if is_busy() else null
 
 
@@ -74,13 +77,13 @@ func current_arc() -> float:
 
 
 ## Centre-to-centre distance at which a swing with `skill` is sure to connect.
-func approach_distance(skill: SkillGem = null) -> float:
+func approach_distance(skill: SkillInstance = null) -> float:
 	return (skill.reach if skill != null else reach) + 0.1
 
 
 ## Starts a swing toward `direction`. Returns false if already swinging.
 ## Pass `leap_to` to carry the body to that point during the wind-up.
-func swing(direction: Vector3, skill: SkillGem = null, leap_to: Vector3 = Vector3.INF) -> bool:
+func swing(direction: Vector3, skill: SkillInstance = null, leap_to: Vector3 = Vector3.INF) -> bool:
 	if is_busy():
 		return false
 	direction.y = 0.0
@@ -138,18 +141,58 @@ func _end_leap() -> void:
 
 
 func _resolve_hit() -> void:
-	var multiplier: float = _skill.damage_multiplier if _skill != null else 1.0
 	var hit_all: bool = _skill != null and _skill.hits_all
-	for target: Node3D in _find_targets(hit_all):
-		var damage: float = randf_range(damage_min, damage_max) * multiplier
-		var critical: bool = randf() * 100.0 < crit_chance
-		if critical:
-			damage *= crit_multiplier / 100.0
-		var health: Health = Health.of(target)
-		health.take_damage(roundf(damage))
-		if culling_percent > 0.0 and not health.is_dead() 				and health.current < health.max_health * culling_percent / 100.0:
-			health.take_damage(health.current + 1.0, &"culling")
-		swing_hit.emit(target, damage, critical)
+	var targets: Array[Node3D] = _find_targets(hit_all)
+	for target: Node3D in targets:
+		_hit(target, 1.0)
+	# Melee Splash: single-target strikes also hit enemies around the target.
+	if _skill != null and _skill.splash_radius > 0.0 and not hit_all and not targets.is_empty():
+		for other: Node3D in _enemies_near(targets[0].global_position, _skill.splash_radius * area_multiplier):
+			if other != targets[0]:
+				_hit(other, _skill.splash_damage_percent / 100.0)
+
+
+## Rolls and deals one hit. `scale` reduces splash hits.
+func _hit(target: Node3D, scale: float) -> void:
+	var phys: float = randf_range(damage_min, damage_max)
+	var fire: float = randf_range(fire_min, fire_max)
+	var multiplier: float = 1.0
+	if _skill != null:
+		fire += phys * _skill.extra_fire_percent / 100.0
+		phys *= _skill.more_physical
+		if _skill.no_elemental:
+			fire = 0.0
+		multiplier = _skill.damage_multiplier
+	var damage: float = (phys + fire) * multiplier * scale
+	var critical: bool = randf() * 100.0 < crit_chance
+	if critical:
+		damage *= crit_multiplier / 100.0
+	var health: Health = Health.of(target)
+	health.take_damage(roundf(damage))
+	if culling_percent > 0.0 and not health.is_dead() 			and health.current < health.max_health * culling_percent / 100.0:
+		health.take_damage(health.current + 1.0, &"culling")
+	if _skill != null and _skill.leech_percent > 0.0:
+		var own: Health = Health.of(_body)
+		if own != null:
+			own.heal(damage * _skill.leech_percent / 100.0)
+	swing_hit.emit(target, damage, critical)
+
+
+func _enemies_near(center: Vector3, radius: float) -> Array[Node3D]:
+	var shape := SphereShape3D.new()
+	shape.radius = radius
+	var params := PhysicsShapeQueryParameters3D.new()
+	params.shape = shape
+	params.transform = Transform3D(Basis.IDENTITY, center + Vector3.UP * strike_height)
+	params.collision_mask = target_mask
+	params.exclude = [_body.get_rid()]
+	var found: Array[Node3D] = []
+	for result: Dictionary in _body.get_world_3d().direct_space_state.intersect_shape(params, 32):
+		var node: Node3D = result["collider"] as Node3D
+		var health: Health = Health.of(node)
+		if health != null and not health.is_dead() and not found.has(node):
+			found.append(node)
+	return found
 
 
 ## Living targets in the swing area, closest first. Only the closest unless `hit_all`.

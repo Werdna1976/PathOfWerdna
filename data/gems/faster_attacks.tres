@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SupportGem" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/support_gem.gd" id="1_gem"]
+
+[resource]
+script = ExtResource("1_gem")
+id = &"faster_attacks"
+display_name = "Faster Attacks Support"
+short_name = "Faster"
+description = "Supports attack skills, making them attack faster."
+tags = Array[StringName]([&"support", &"attack"])
+supported_tags = Array[StringName]([&"attack"])
+mana_multiplier = 1.2
+attack_speed = 30.0
+effect_lines = Array[String](["Supported skills attack 30% faster"])

@@ -20,7 +20,7 @@ C:/GoDot/Godot_v4.7.2-stable_win64.exe --path C:/GoDot/Projects/Godot-Opus-ARPG
 |---|---|---|
 | Left click (hold) | Move to the cursor | **Working** |
 | Right click (hold) | Skill in the RMB slot (Heavy Strike): click an enemy to walk up and hit it, or click the ground to swing in place | **Working** |
-| Q W E R T | Skill slots (Q = Cleave, W = Leap Slam). Click a slot on the skill bar to change its skill | **Working** |
+| Q W E R T | Skill slots, filled from socketed gems (Q = Cleave, W = Leap Slam to start). Click a slot on the skill bar to change its skill | **Working** |
 | 1 / 2 | Health potion / mana potion | **Working** |
 | 3–5 | Future potions | Bound, no behavior yet |
 | I | Inventory: click to pick up, place, swap or equip; right-click to quick equip or unequip; click the world while holding an item to drop it | **Working** |
@@ -164,6 +164,35 @@ Keys are bound by physical location, so they stay in the same place on non-QWERT
   `*` roll on gear but don't do anything in combat yet: bleed, stun, avoid stun or ailments,
   explode on kill and Onslaught.
 
+## Milestone 4c: "Sockets and gems"
+
+- **Gems are items:** 1×1, with a teal name. Supports are `SupportGem` resources in
+  `data/gems/`, and `ItemDB.make_gem(id)` creates a gem item.
+- **Sockets:** every socket on an item is linked. In the inventory screen:
+  - Sockets are circles on the item. Active gems show as solid red, supports as a ring.
+  - Holding a gem, click a socket to socket it, swapping with any gem already there. With
+    nothing held, click a filled socket to take the gem out.
+  - Hovering a socket shows that gem's tooltip. Item tooltips list their socketed gems.
+- **Skill bar** (`SkillBar`) builds a `SkillInstance` for each active gem in equipped gear,
+  supported by compatible supports in the same item.
+  - Slot assignments are kept across changes. New skills fill the first empty slot. A slot the
+    player cleared stays clear.
+  - With nothing on right click, Werdna uses **Default Attack** (100% damage, no cost).
+- **Supports:**
+
+| Support | Effect | Mana | Supports |
+|---|---|---|---|
+| Added Fire Damage | Gain 25% of physical as extra fire | ×1.2 | attacks |
+| Melee Splash | Also hits enemies within 1.8 of the target for 60% damage | ×1.4 | strikes (Heavy Strike) |
+| Faster Attacks | 30% faster attacks | ×1.2 | attacks |
+| Life Leech | Heal 5% of damage dealt | ×1.1 | attacks |
+| Brutality | 40% more physical damage, no elemental damage | ×1.2 | attacks |
+
+- **Starting kit** (`Equipment.STARTING_KIT`): a Rusted Hatchet with 2 sockets holding Heavy
+  Strike and Cleave, and a Plate Vest with 3 sockets holding Leap Slam. All five supports start
+  in the bag until vendors and quests exist.
+- **Gem levels** always show 1. Gem XP arrives with character XP in Milestone 5.
+
 ### Why a perspective camera
 
 The camera uses **perspective with a narrow 35° FOV** instead of orthographic because:
@@ -227,6 +256,16 @@ C:/GoDot/Godot_v4.7.2-stable_win64.exe --headless --path C:/GoDot/Projects/Godot
 The equipment test covers slot rules and two-handed conflicts, life, mana and attribute
 maths, weapon damage and attack speed, armour, energy shield absorption and recharge, block and
 evasion rates, the resistance cap, charm stats, and every inventory screen action.
+
+Run the headless Milestone 4c test:
+
+```bash
+C:/GoDot/Godot_v4.7.2-stable_win64.exe --headless --path C:/GoDot/Projects/Godot-Opus-ARPG -s res://tests/test_gems.gd
+```
+
+The gems test covers the starting kit, socketing and swapping, support compatibility, mana
+cost multipliers, the skill bar following gem changes, exact damage with Added Fire and
+Brutality, Melee Splash, Life Leech, Default Attack, and gem tooltips.
 
 It checks that:
 - every Input Map action exists and is bound

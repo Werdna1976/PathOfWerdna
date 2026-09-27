@@ -12,9 +12,7 @@
 [ext_resource type="Script" path="res://scripts/components/mana.gd" id="10_mana"]
 [ext_resource type="Script" path="res://scripts/components/skill_bar.gd" id="11_skills"]
 [ext_resource type="Script" path="res://scripts/components/potion_belt.gd" id="12_potions"]
-[ext_resource type="Resource" path="res://data/gems/heavy_strike.tres" id="13_heavy"]
-[ext_resource type="Resource" path="res://data/gems/cleave.tres" id="14_cleave"]
-[ext_resource type="Resource" path="res://data/gems/leap_slam.tres" id="15_leap"]
+[ext_resource type="Resource" path="res://data/gems/default_attack.tres" id="13_default"]
 [ext_resource type="Resource" path="res://data/potions/health_potion.tres" id="16_hp"]
 [ext_resource type="Resource" path="res://data/potions/mana_potion.tres" id="17_mp"]
 [ext_resource type="Script" path="res://scripts/components/inventory.gd" id="18_inv"]
@@ -114,11 +112,11 @@ damage_max = 15.0
 target_mask = 4
 leap_visual = NodePath("../Visual")
 
-[node name="SkillBar" type="Node" parent="." node_paths=PackedStringArray("mana")]
+[node name="SkillBar" type="Node" parent="." node_paths=PackedStringArray("mana", "equipment")]
 script = ExtResource("11_skills")
 mana = NodePath("../Mana")
-known_gems = Array[Resource]([ExtResource("13_heavy"), ExtResource("14_cleave"), ExtResource("15_leap")])
-slots = Array[Resource]([ExtResource("13_heavy"), ExtResource("14_cleave"), ExtResource("15_leap")])
+equipment = NodePath("../Equipment")
+default_attack = ExtResource("13_default")
 
 [node name="PotionBelt" type="Node" parent="." node_paths=PackedStringArray("health", "mana")]
 script = ExtResource("12_potions")
@@ -173,9 +171,9 @@ health = NodePath("../Health")
 combat = NodePath("../PlayerCombat")
 click_move = NodePath("../ClickMoveInput")
 
-[node name="Equipment" type="Node" parent="."]
+[node name="Equipment" type="Node" parent="." node_paths=PackedStringArray("inventory")]
 script = ExtResource("20_equip")
-starting_items = Array[StringName]([&"rusted_hatchet"])
+inventory = NodePath("../Inventory")
 
 [node name="CharacterStats" type="Node" parent="." node_paths=PackedStringArray("equipment", "health", "mana", "defenses", "melee", "movement", "potions", "skill_bar")]
 script = ExtResource("22_stats")

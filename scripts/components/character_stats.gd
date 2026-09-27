@@ -125,8 +125,10 @@ func _apply() -> void:
 	defenses.recoup_percent = values[&"life_recoup"]
 	defenses.set_max_energy_shield(values[&"energy_shield"])
 
-	melee.damage_min = values[&"phys_min"] + values[&"fire_min"]
-	melee.damage_max = values[&"phys_max"] + values[&"fire_max"]
+	melee.damage_min = values[&"phys_min"]
+	melee.damage_max = values[&"phys_max"]
+	melee.fire_min = values[&"fire_min"]
+	melee.fire_max = values[&"fire_max"]
 	melee.speed_multiplier = values[&"attacks_per_second"] / REFERENCE_APS
 	melee.crit_chance = values[&"crit_chance"]
 	melee.crit_multiplier = values[&"crit_multiplier"]

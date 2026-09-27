@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SupportGem" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/support_gem.gd" id="1_gem"]
+
+[resource]
+script = ExtResource("1_gem")
+id = &"melee_splash"
+display_name = "Melee Splash Support"
+short_name = "Splash"
+description = "Supports single-target melee strikes, making them also hit enemies around the target."
+tags = Array[StringName]([&"support", &"area"])
+supported_tags = Array[StringName]([&"strike"])
+mana_multiplier = 1.4
+splash_radius = 1.8
+splash_damage_percent = 60.0
+effect_lines = Array[String](["Strikes also hit enemies within 1.8 metres of the target", "Splash hits deal 60% of the damage"])

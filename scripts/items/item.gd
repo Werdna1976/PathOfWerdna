@@ -13,6 +13,7 @@ const RARITY_COLORS: Array[Color] = [
 	Color(0.95, 0.55, 0.15),
 ]
 const CURRENCY_COLOR: Color = Color(0.78, 0.72, 0.58)
+const GEM_COLOR: Color = Color(0.11, 0.66, 0.6)
 ## Max prefixes and suffixes (each) per rarity.
 const AFFIX_LIMITS: Array[int] = [0, 1, 2, 3]
 
@@ -24,6 +25,11 @@ var implicit_value: int = 0
 ## Each: {id: StringName, tier: int, value: int}
 var affixes: Array[Dictionary] = []
 var sockets: int = 0
+## Gem items in each socket (null = empty). Sized to `sockets` on demand.
+var socketed: Array[Item] = []
+## Set for gem items: the gem this item is.
+var gem: GemData
+var gem_level: int = 1
 var stack: int = 1
 ## Generated name for rares and legendaries.
 var rare_name: String = ""
@@ -52,8 +58,31 @@ func has_group(group: StringName) -> bool:
 	return false
 
 
+## The gem in socket `index`, or null.
+func socketed_gem(index: int) -> Item:
+	return socketed[index] if index < socketed.size() else null
+
+
+## Puts `gem_item` into socket `index` and returns the gem that was there (or null).
+func socket_gem(index: int, gem_item: Item) -> Item:
+	if socketed.size() < sockets:
+		socketed.resize(sockets)
+	var previous: Item = socketed[index]
+	socketed[index] = gem_item
+	return previous
+
+
+## Socketed gem items, skipping empty sockets.
+func gems() -> Array[Item]:
+	var list: Array[Item] = []
+	for g: Item in socketed:
+		if g != null:
+			list.append(g)
+	return list
+
+
 func display_name() -> String:
-	if base.is_currency():
+	if base.is_currency() or base.is_gem():
 		return base.name
 	match rarity:
 		Rarity.MAGIC:
@@ -73,6 +102,8 @@ func display_name() -> String:
 
 
 func color() -> Color:
+	if base.is_gem():
+		return GEM_COLOR
 	return CURRENCY_COLOR if base.is_currency() else RARITY_COLORS[rarity]
 
 

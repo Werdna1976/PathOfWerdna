@@ -4,6 +4,17 @@ extends RefCounted
 
 const BASES_PATH: String = "res://data/items/bases.json"
 const AFFIXES_PATH: String = "res://data/items/affixes.json"
+## Every gem resource, by id. Default Attack isn't a gem item and is loaded by SkillBar.
+const GEM_PATHS: Dictionary = {
+	&"heavy_strike": "res://data/gems/heavy_strike.tres",
+	&"cleave": "res://data/gems/cleave.tres",
+	&"leap_slam": "res://data/gems/leap_slam.tres",
+	&"added_fire": "res://data/gems/added_fire.tres",
+	&"melee_splash": "res://data/gems/melee_splash.tres",
+	&"faster_attacks": "res://data/gems/faster_attacks.tres",
+	&"life_leech": "res://data/gems/life_leech.tres",
+	&"brutality": "res://data/gems/brutality.tres",
+}
 
 static var _bases: Dictionary = {}
 static var _base_list: Array[ItemBase] = []
@@ -29,6 +40,36 @@ static func affix(id: StringName) -> AffixDef:
 static func affixes() -> Array[AffixDef]:
 	_ensure_loaded()
 	return _affix_list
+
+
+static func gem(id: StringName) -> GemData:
+	return load(GEM_PATHS[id]) as GemData if GEM_PATHS.has(id) else null
+
+
+static var _gem_bases: Dictionary = {}
+
+
+## The (cached) item base used for gem items of this gem.
+static func gem_base(data: GemData) -> ItemBase:
+	if not _gem_bases.has(data.id):
+		var b := ItemBase.new()
+		b.id = StringName("gem_" + String(data.id))
+		b.name = data.display_name
+		b.slot = &"gem"
+		b.tags = [&"gem"]
+		b.size = Vector2i.ONE
+		b.description = data.description
+		_gem_bases[data.id] = b
+	return _gem_bases[data.id]
+
+
+## A new gem item for the gem with this id.
+static func make_gem(id: StringName) -> Item:
+	var data: GemData = gem(id)
+	var item := Item.new()
+	item.base = gem_base(data)
+	item.gem = data
+	return item
 
 
 static func _ensure_loaded() -> void:

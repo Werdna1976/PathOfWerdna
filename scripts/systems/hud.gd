@@ -100,7 +100,7 @@ func _process(delta: float) -> void:
 	if _skill_bar == null:
 		return
 	for slot: int in SkillBar.SLOT_COUNT:
-		var gem: SkillGem = _skill_bar.gem_in(slot)
+		var gem: SkillInstance = _skill_bar.gem_in(slot)
 		var fraction: float = 0.0
 		if gem != null and gem.cooldown > 0.0:
 			fraction = _skill_bar.cooldown_left(gem) / gem.cooldown
@@ -268,7 +268,7 @@ func _build_skill_bar() -> void:
 
 func _refresh_slots() -> void:
 	for slot: int in SkillBar.SLOT_COUNT:
-		var gem: SkillGem = _skill_bar.gem_in(slot)
+		var gem: SkillInstance = _skill_bar.gem_in(slot)
 		_slot_names[slot].text = gem.short_name if gem != null else ""
 		_slot_costs[slot].text = str(int(gem.mana_cost)) if gem != null and gem.mana_cost > 0.0 else ""
 

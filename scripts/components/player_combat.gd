@@ -88,7 +88,7 @@ func _physics_process(_delta: float) -> void:
 		_order_from_cursor(held)
 	if _slot < 0:
 		return
-	var gem: SkillGem = skill_bar.gem_in(_slot)
+	var gem: SkillInstance = skill_bar.gem_in(_slot)
 	if gem == null:
 		clear()
 		return
@@ -108,7 +108,7 @@ func _physics_process(_delta: float) -> void:
 		clear()
 
 
-func _pursue(gem: SkillGem, holding: bool) -> void:
+func _pursue(gem: SkillInstance, holding: bool) -> void:
 	var offset: Vector3 = _target.global_position - _body.global_position
 	offset.y = 0.0
 	if offset.length() > melee.approach_distance(gem):
@@ -120,7 +120,7 @@ func _pursue(gem: SkillGem, holding: bool) -> void:
 		clear()
 
 
-func _leap(gem: SkillGem) -> void:
+func _leap(gem: SkillInstance) -> void:
 	var aim: Vector3 = _target.global_position if _target != null else _point
 	var offset: Vector3 = aim - _body.global_position
 	offset.y = 0.0
@@ -140,7 +140,7 @@ func _leap(gem: SkillGem) -> void:
 
 
 func _on_swing_started() -> void:
-	var skill: SkillGem = melee.current_skill()
+	var skill: SkillInstance = melee.current_skill()
 	if skill != null and skill.is_leap():
 		movement.locked = true  # the leap itself moves the body
 	else:
@@ -155,7 +155,7 @@ func _on_swing_finished() -> void:
 
 
 ## Starts the skill if it's off cooldown and affordable. Returns whether it started.
-func _use(gem: SkillGem, direction: Vector3, leap_to: Vector3 = Vector3.INF) -> bool:
+func _use(gem: SkillInstance, direction: Vector3, leap_to: Vector3 = Vector3.INF) -> bool:
 	var problem: String = skill_bar.check(gem)
 	if problem != "":
 		skill_bar.report_failure(problem)

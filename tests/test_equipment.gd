@@ -135,7 +135,7 @@ func _test_weapon_stats() -> void:
 	_check("faster attacks shorten swings", is_equal_approx(_melee.speed_multiplier, 1.76 / 1.5))
 	_equipment.equip(_make(&"iron_ring", Item.Rarity.MAGIC, [["added_fire_attacks", 3]]), &"ring_left")
 	_check("added fire to attacks joins melee damage", _stats.stat(&"fire_min") == 3.0 and _stats.stat(&"fire_max") == 6.0
-		and _melee.damage_max == _stats.stat(&"phys_max") + 6.0)
+		and _melee.fire_max == 6.0 and _melee.damage_max == _stats.stat(&"phys_max"))
 	_equipment.unequip(&"main_hand")
 	_equipment.unequip(&"ring_left")  # its implicit adds physical damage to attacks
 	_check("unarmed damage is 2-6", _stats.stat(&"phys_min") == 2.0 and _stats.stat(&"phys_max") == 6.0)
@@ -243,6 +243,7 @@ func _test_inventory_screen() -> void:
 	screen.toggle()
 	_check("I opens the inventory", screen.visible)
 
+	_inventory.entries.clear()  # start from an empty bag (no starting gems)
 	var vest: Item = _make(&"plate_vest")
 	var ring: Item = _make(&"coral_ring")
 	_inventory.try_add(vest)

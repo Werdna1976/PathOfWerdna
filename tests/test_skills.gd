@@ -60,7 +60,7 @@ func _run() -> void:
 func _check_loadout() -> void:
 	var names: Array[String] = []
 	for slot: int in SkillBar.SLOT_COUNT:
-		var gem: SkillGem = _skills.gem_in(slot)
+		var gem: SkillInstance = _skills.gem_in(slot)
 		names.append(gem.display_name if gem != null else "-")
 	print("  info: skill bar = %s" % [names])
 	_check("default loadout is Heavy Strike / Cleave / Leap Slam on RMB / Q / W",
@@ -106,7 +106,7 @@ func _test_heavy_strike_single_target() -> void:
 
 func _test_leap_slam() -> void:
 	await _reset_player()
-	var leap: SkillGem = _skills.gem_in(SLOT_LEAP)
+	var leap: SkillInstance = _skills.gem_in(SLOT_LEAP)
 	var goblin: CharacterBody3D = await _spawn_goblin(OPEN_SPOT + Vector3(6.0, 0, 0))
 	var start: Vector3 = _player.global_position
 	_combat.order_target(SLOT_LEAP, goblin)

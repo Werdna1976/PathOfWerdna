@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SupportGem" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/support_gem.gd" id="1_gem"]
+
+[resource]
+script = ExtResource("1_gem")
+id = &"added_fire"
+display_name = "Added Fire Damage Support"
+short_name = "Added Fire"
+description = "Supports attack skills, adding fire damage based on their physical damage."
+tags = Array[StringName]([&"support", &"fire"])
+supported_tags = Array[StringName]([&"attack"])
+mana_multiplier = 1.2
+extra_fire_percent = 25.0
+effect_lines = Array[String](["Supported skills gain 25% of Physical Damage as Extra Fire Damage"])

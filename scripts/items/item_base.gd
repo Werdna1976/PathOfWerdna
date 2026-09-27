@@ -55,7 +55,7 @@ func type_name() -> String:
 	return {
 		&"off_hand": "Shield", &"chest": "Body Armour", &"helm": "Helmet", &"gloves": "Gloves",
 		&"boots": "Boots", &"ring": "Ring", &"amulet": "Amulet", &"charm": "Charm",
-		&"currency": "Stackable Currency",
+		&"currency": "Stackable Currency", &"gem": "Gem",
 	}.get(slot, "Item")
 
 
@@ -65,6 +65,10 @@ func has_tag(tag: StringName) -> bool:
 
 func is_currency() -> bool:
 	return slot == &"currency"
+
+
+func is_gem() -> bool:
+	return slot == &"gem"
 
 
 func is_weapon() -> bool:

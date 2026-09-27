@@ -15,17 +15,36 @@ const SLOT_NAMES: Dictionary = {
 	&"amulet": "Amulet", &"charm": "Charm",
 }
 
-## Base ids equipped (as normal items) when the character is created.
-@export var starting_items: Array[StringName] = []
+## Gear equipped when the character is created: base id, socket count, and
+## the gems socketed in it. Until vendors and quests hand out gems, the
+## support gems start in the bag (STARTING_BAG).
+const STARTING_KIT: Array[Dictionary] = [
+	{"base": &"rusted_hatchet", "sockets": 2, "gems": [&"heavy_strike", &"cleave"]},
+	{"base": &"plate_vest", "sockets": 3, "gems": [&"leap_slam"]},
+]
+const STARTING_BAG: Array[StringName] = [&"added_fire", &"melee_splash", &"faster_attacks", &"life_leech", &"brutality"]
+
+@export var give_starting_kit: bool = true
+## Where the starting support gems go.
+@export var inventory: Inventory
 
 var _items: Dictionary = {}
 
 
 func _ready() -> void:
+	if not give_starting_kit:
+		return
 	var generator := ItemGenerator.new()
-	for id: StringName in starting_items:
-		var item: Item = generator.generate(ItemDB.base(id), 1, Item.Rarity.NORMAL)
+	for entry: Dictionary in STARTING_KIT:
+		var item: Item = generator.generate(ItemDB.base(entry["base"]), 1, Item.Rarity.NORMAL)
+		item.sockets = entry["sockets"]
+		var gem_ids: Array = entry["gems"]
+		for i: int in gem_ids.size():
+			item.socket_gem(i, ItemDB.make_gem(gem_ids[i]))
 		equip(item, best_slot(item))
+	if inventory != null:
+		for id: StringName in STARTING_BAG:
+			inventory.try_add(ItemDB.make_gem(id))
 
 
 func get_item(slot: StringName) -> Item:
@@ -85,6 +104,11 @@ func equip(item: Item, slot: StringName) -> Array[Item]:
 	_items[slot] = item
 	changed.emit()
 	return displaced
+
+
+## Call after changing the gems in an equipped item, so skills are rebuilt.
+func notify_changed() -> void:
+	changed.emit()
 
 
 func unequip(slot: StringName) -> Item:
