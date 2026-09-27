@@ -3,6 +3,9 @@ extends Node
 ## Turns the `move` action into navigation targets by raycasting from the
 ## active camera to the world. Holding the button keeps updating the target.
 
+## Emitted when the player clicks the world to move.
+signal move_ordered
+
 @export var movement: NavMovement
 @export_flags_3d_physics var ground_mask: int = 1
 @export var marker_scene: PackedScene
@@ -15,6 +18,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not event.is_action_pressed("move"):
 		return
 	_holding = true
+	move_ordered.emit()
 	var point: Vector3 = CursorRay.ground_point(get_viewport(), ground_mask)
 	if point.is_finite():
 		movement.set_target(point)

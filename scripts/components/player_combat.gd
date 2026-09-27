@@ -51,6 +51,10 @@ func attack_point(point: Vector3) -> void:
 	order_point(0, point)
 
 
+func has_order() -> bool:
+	return _slot >= 0
+
+
 func clear() -> void:
 	_slot = -1
 	_target = null

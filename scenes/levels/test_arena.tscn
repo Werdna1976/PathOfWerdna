@@ -6,6 +6,8 @@
 [ext_resource type="Script" path="res://scripts/systems/enemy_spawner.gd" id="4_spawner"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/goblin.tscn" id="5_goblin"]
 [ext_resource type="Script" path="res://scripts/systems/hud.gd" id="6_hud"]
+[ext_resource type="Script" path="res://scripts/systems/area_info.gd" id="7_area"]
+[ext_resource type="Script" path="res://scripts/ui/ground_labels.gd" id="8_labels"]
 
 [sub_resource type="Environment" id="Environment_dark"]
 background_mode = 1
@@ -367,3 +369,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 12)
 
 [node name="Hud" type="CanvasLayer" parent="."]
 script = ExtResource("6_hud")
+
+[node name="AreaInfo" type="Node" parent="."]
+script = ExtResource("7_area")
+area_level = 5
+
+[node name="GroundLabels" type="CanvasLayer" parent="."]
+script = ExtResource("8_labels")

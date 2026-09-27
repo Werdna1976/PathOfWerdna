@@ -208,6 +208,7 @@ Attributes, gear, passives, gems and buffs all feed the same pipeline.
 
 ## Godot architecture
 - An isometric `Camera3D` with a `NavigationRegion3D` for click-to-move.
+- **Item bases and affixes are JSON** in `data/items/`. Large tables are easier to read and tune as JSON. Everything else uses `.tres` resources.
 - **Data as `.tres` resources:** `ItemBase`, `AffixDef` (with tiers), `AffixPool`, `GemData`, `PassiveNode`, `EnemyData`.
 - **An item instance:** `{base_id, ilvl, rarity, affixes: [AffixRoll], sockets: [gem or null]}`.
 - **Autoloads:** `Game`, `Events` (a signal bus) and `LootTables`.
@@ -226,7 +227,10 @@ res://
 1. **Walk:** camera, click-to-move, and a dark test arena with lighting.
 2. **Fight:** Heavy Strike (hardcoded), one enemy type, health bars and death.
 3. **Gems and potions:** the gem data model, the 3 actives on the skill bar, mana, and both potions.
-4. **Loot:** iLvl, bases, affix rolling, ground labels, inventory, equipment, sockets and supports.
+4. **Loot**, split into three parts:
+   - **4a, items and drops:** item levels, bases, affix rolling, drops, ground labels and pickup. *(Done.)*
+   - **4b, inventory and equipment:** the inventory screen, equipping the 10 slots, and gear stats applying to Werdna.
+   - **4c, sockets and gems:** socketing gems, support gems, and the skill bar drawing from socketed gems.
 5. **Progression:** XP, levels, attributes and the warrior region of the skill tree.
 6. **Content:** more enemies, a boss, a town hub and procedural map pieces.
 

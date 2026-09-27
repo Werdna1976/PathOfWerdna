@@ -73,6 +73,8 @@ func _bind_player() -> void:
 	_potion_belt.drink_failed.connect(_show_message)
 	_refresh_potions()
 
+	(player.get_node("ItemPickup") as ItemPickup).pickup_failed.connect(_show_message)
+
 
 func _process(delta: float) -> void:
 	if _message_time > 0.0:

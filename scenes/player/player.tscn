@@ -17,6 +17,8 @@
 [ext_resource type="Resource" path="res://data/gems/leap_slam.tres" id="15_leap"]
 [ext_resource type="Resource" path="res://data/potions/health_potion.tres" id="16_hp"]
 [ext_resource type="Resource" path="res://data/potions/mana_potion.tres" id="17_mp"]
+[ext_resource type="Script" path="res://scripts/components/inventory.gd" id="18_inv"]
+[ext_resource type="Script" path="res://scripts/components/item_pickup.gd" id="19_pickup"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.4
@@ -149,3 +151,14 @@ number_height = 2.3
 script = ExtResource("9_swing")
 melee = NodePath("../Melee")
 pivot = NodePath("../Visual/WeaponPivot")
+
+[node name="Inventory" type="Node" parent="."]
+script = ExtResource("18_inv")
+
+[node name="ItemPickup" type="Node" parent="." node_paths=PackedStringArray("movement", "inventory", "health", "combat", "click_move")]
+script = ExtResource("19_pickup")
+movement = NodePath("../NavMovement")
+inventory = NodePath("../Inventory")
+health = NodePath("../Health")
+combat = NodePath("../PlayerCombat")
+click_move = NodePath("../ClickMoveInput")

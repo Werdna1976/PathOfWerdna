@@ -24,7 +24,8 @@ C:/GoDot/Godot_v4.7.2-stable_win64.exe --path C:/GoDot/Projects/Godot-Opus-ARPG
 | 1 / 2 | Health potion / mana potion | **Working** |
 | 3–5 | Future potions | Bound, no behavior yet |
 | I / C / P | Inventory / character / passives | Bound, no behavior yet |
-| Alt (hold) | Show ground-item labels | Bound, no behavior yet |
+| Alt (hold) | Show labels for normal items too; in a tooltip, show each affix's tier | **Working** |
+| Left click a ground label | Walk over and pick the item up | **Working** |
 | Esc | Menu | Bound, no behavior yet |
 
 Keys are bound by physical location, so they stay in the same place on non-QWERTY layouts.
@@ -92,6 +93,37 @@ Keys are bound by physical location, so they stay in the same place on non-QWERT
   - Kills add 3 charges to each potion, and respawning refills them.
   - The HUD shows each potion's fill beside the life bar.
 
+## Milestone 4a: "Items and drops"
+
+- **Item data lives in JSON**, so a large table stays readable and easy to tune in one place:
+  - `data/items/bases.json` has 50 bases: axes, swords and maces (one- and two-handed), 2
+    shields, chest, helm, gloves and boots in AR/EV/ES and hybrid versions, 6 rings, 4 amulets,
+    4 charms and 8 orbs.
+  - `data/items/affixes.json` has 40 affixes with 2–6 tiers each.
+  - `ItemDB` loads and caches both.
+- **Rolling** (`ItemGenerator`):
+  - Rarity weights are normal 62%, magic 30%, rare 7.5% and legendary 0.5%.
+  - Affix counts: magic 1–2 (up to 1 prefix and 1 suffix), rare 3–4 (up to 2/2), legendary
+    4–6 (up to 3/3).
+  - Each tier needs a minimum item level. No affix group appears twice on one item.
+  - Legendaries weight tiers by `1 + 0.5 × tier rank`.
+  - Sockets are weighted 40/30/20/10 for 1–4, capped by the base.
+  - Rares get random two-word names.
+- **Mod identity comes from tags:** an affix lists the item tags it can roll on, with weight
+  multipliers. Bleed needs `bladed` (axes and swords). Stun and area of effect need `mace`. Crit
+  multiplier is weighted toward axes; attack speed, crit chance and accuracy toward swords.
+  Charms have their own tags, so they only roll charm mods: culling strike, rarity and quantity,
+  recoup, movement speed, cooldowns, on-kill effects and more.
+- **Drops:** each goblin (`LootDropper`) has a 35% item chance and a 15% currency chance. Item
+  level is the area level, set by the `AreaInfo` node (5 in the test arena).
+- **On the ground:**
+  - Items show as a tile coloured by rarity. Rares and legendaries also get a light beam.
+  - `GroundLabels` draws clickable labels and pushes overlapping ones upward.
+  - Hovering a label shows the item tooltip; holding Alt adds each affix's tier.
+  - Clicking a label walks Werdna over, and the item goes into his inventory.
+- **Inventory** (`Inventory`) is a PoE-style 12×5 grid. Items fill column by column and
+  currency stacks. The inventory screen comes in 4b.
+
 ### Why a perspective camera
 
 The camera uses **perspective with a narrow 35° FOV** instead of orthographic because:
@@ -135,6 +167,16 @@ C:/GoDot/Godot_v4.7.2-stable_win64.exe --headless --path C:/GoDot/Projects/Godot
 The skills test checks the loadout, Cleave hitting multiple enemies, Heavy Strike hitting one,
 Leap Slam's movement, damage and cooldown, refusal when out of mana, mana regeneration, both
 potions, empty potions, and charges gained from kills.
+
+Run the headless Milestone 4a test:
+
+```bash
+C:/GoDot/Godot_v4.7.2-stable_win64.exe --headless --path C:/GoDot/Projects/Godot-Opus-ARPG -s res://tests/test_loot.gd
+```
+
+The loot test covers the data tables, 3,000 random drops checked against every affix rule,
+weapon mod identity, charm-only mods, item-level gating, legendary tier bias, socket
+distribution, names, the inventory grid and stacking, and drop-and-pickup in the arena.
 
 It checks that:
 - every Input Map action exists and is bound

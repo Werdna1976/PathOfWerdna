@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/components/hit_feedback.gd" id="5_feedback"]
 [ext_resource type="Script" path="res://scripts/components/swing_animator.gd" id="6_swing"]
 [ext_resource type="Script" path="res://scripts/components/world_health_bar.gd" id="7_bar"]
+[ext_resource type="Script" path="res://scripts/components/loot_dropper.gd" id="8_loot"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.35
@@ -117,4 +118,8 @@ pivot = NodePath("../Visual/WeaponPivot")
 [node name="HealthBar" type="Node3D" parent="." node_paths=PackedStringArray("health")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
 script = ExtResource("7_bar")
+health = NodePath("../Health")
+
+[node name="LootDropper" type="Node" parent="." node_paths=PackedStringArray("health")]
+script = ExtResource("8_loot")
 health = NodePath("../Health")
