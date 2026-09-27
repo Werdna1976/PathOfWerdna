@@ -32,6 +32,8 @@ const SECTIONS: Array = [
 ]
 
 var _stats: CharacterStats
+var _skill_bar: SkillBar
+var _melee: MeleeAttack
 var _rows: VBoxContainer
 
 
@@ -55,7 +57,10 @@ func _ready() -> void:
 
 func bind(player: Node) -> void:
 	_stats = player.get_node("CharacterStats") as CharacterStats
+	_skill_bar = player.get_node("SkillBar") as SkillBar
+	_melee = player.get_node("Melee") as MeleeAttack
 	_stats.recomputed.connect(_refresh)
+	_skill_bar.slots_changed.connect(_refresh)
 	_refresh()
 
 
@@ -72,6 +77,13 @@ func _refresh() -> void:
 		_rows.remove_child(child)
 		child.free()
 	_add_row("Werdna", "Warrior", HEADER_COLOR, 18)
+	# Damage only means something for a skill, so lead with each slotted skill's DPS.
+	_add_row("Skills (damage per second)", "", HEADER_COLOR, 15)
+	for slot: int in SkillBar.SLOT_COUNT:
+		var skill: SkillInstance = _skill_bar.gem_in(slot)
+		if skill != null:
+			var e: Dictionary = _melee.estimate(skill, _skill_bar.cooldown_rate)
+			_add_row("  %s  %s" % [SkillBar.SLOT_KEYS[slot], skill.display_name], "%.1f" % e["dps"], LABEL_COLOR, 13)
 	for section: Array in SECTIONS:
 		_add_row(section[0], "", HEADER_COLOR, 15)
 		for entry: Array in section[1]:

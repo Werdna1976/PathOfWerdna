@@ -25,17 +25,37 @@ func _init() -> void:
 
 var _shown_item: Item
 var _shown_detailed: bool = false
+var _shown_skill_key: String = ""
 
 
-func show_item(item: Item, detailed: bool = false) -> void:
+## Shows a skill (from the skill bar) with its damage estimate.
+func show_skill(skill: SkillInstance, estimate: Dictionary) -> void:
+	# Callers may call this every frame; only rebuild when the numbers change.
+	var key: String = "%s|%s|%.2f" % [skill.gem_item, skill.display_name, estimate["dps"]]
+	if visible and key == _shown_skill_key:
+		return
+	_shown_skill_key = key
+	_shown_item = null
+	_clear()
+	(get_theme_stylebox("panel") as StyleBoxFlat).border_color = Item.GEM_COLOR
+	_add(skill.display_name, Item.GEM_COLOR, 18, true)
+	if not skill.supports.is_empty():
+		_add("Supported by: %s" % ", ".join(PackedStringArray(skill.supports.map(
+			func(s: SupportGem) -> String: return s.short_name))), LABEL_COLOR)
+	_separator()
+	_add_skill_numbers(skill, estimate)
+	_finish()
+
+
+## `skill_estimate` is {skill, estimate} for an active gem socketed in equipped gear.
+func show_item(item: Item, detailed: bool = false, skill_estimate: Dictionary = {}) -> void:
 	# Callers may call this every frame; only rebuild when something changed.
 	if visible and item == _shown_item and detailed == _shown_detailed:
 		return
 	_shown_item = item
 	_shown_detailed = detailed
-	for child: Node in _lines.get_children():
-		_lines.remove_child(child)
-		child.free()
+	_shown_skill_key = ""
+	_clear()
 	(get_theme_stylebox("panel") as StyleBoxFlat).border_color = item.color()
 
 	_add(item.display_name(), item.color(), 18, true)
@@ -46,6 +66,10 @@ func show_item(item: Item, detailed: bool = false) -> void:
 
 	if item.base.is_gem():
 		_show_gem(item)
+		if not skill_estimate.is_empty():
+			_separator()
+			_add("With your gear and linked supports:", LABEL_COLOR, 13)
+			_add_skill_numbers(skill_estimate["skill"], skill_estimate["estimate"])
 		_finish()
 		return
 
@@ -53,6 +77,8 @@ func show_item(item: Item, detailed: bool = false) -> void:
 		_add("Stack Size: %d / %d" % [item.stack, item.base.max_stack], VALUE_COLOR)
 		if item.base.description != "":
 			_add(item.base.description, LABEL_COLOR)
+		if Crafting.is_orb(item):
+			_add("Right click to use, then left click an item. Hold Shift to keep using.", LABEL_COLOR, 12)
 		_finish()
 		return
 
@@ -96,6 +122,26 @@ func show_item(item: Item, detailed: bool = false) -> void:
 						tier, def.tiers[roll["tier"]]["name"]]
 				_add(text, AFFIX_COLOR)
 	_finish()
+
+
+func _clear() -> void:
+	for child: Node in _lines.get_children():
+		_lines.remove_child(child)
+		child.free()
+
+
+func _add_skill_numbers(skill: SkillInstance, e: Dictionary) -> void:
+	_add("Damage per Hit: %d-%d" % [roundi(e["hit_min"]), roundi(e["hit_max"])], VALUE_COLOR)
+	_add("Critical Strike: %.1f%% for %d%% damage" % [e["crit_chance"], e["crit_multiplier"]], VALUE_COLOR)
+	_add("Uses per Second: %.2f%s" % [e["uses_per_second"], " (cooldown %.1fs)" % skill.cooldown if skill.cooldown > 0.0 else ""], VALUE_COLOR)
+	if skill.hits_all:
+		_add("Area Radius: %.1f" % e["area_radius"], VALUE_COLOR)
+	if skill.splash_radius > 0.0:
+		_add("Splash: %d%% damage within %.1f" % [skill.splash_damage_percent, skill.splash_radius], VALUE_COLOR)
+	if skill.leech_percent > 0.0:
+		_add("Life Leeched per Hit: %.1f" % e["leech_per_hit"], VALUE_COLOR)
+	_add("Mana Cost: %d" % skill.mana_cost, VALUE_COLOR)
+	_add("Damage per Second: %.1f%s" % [e["dps"], " (per target)" if skill.hits_all else ""], AFFIX_COLOR, 16)
 
 
 func _show_gem(item: Item) -> void:

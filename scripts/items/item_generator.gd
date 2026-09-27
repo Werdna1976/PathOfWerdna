@@ -85,7 +85,7 @@ func reroll_affixes(item: Item) -> void:
 		if not add_random_affix(item):
 			break
 	if item.rarity >= Item.Rarity.RARE:
-		item.rare_name = _rare_name(item.base)
+		item.rare_name = rare_name(item.base)
 
 
 ## Adds one affix of any open kind. Returns false if nothing can be added.
@@ -133,7 +133,7 @@ func roll_sockets(max_sockets: int) -> int:
 	return _weighted_index(SOCKET_WEIGHTS.slice(0, max_sockets)) + 1
 
 
-func _rare_name(base: ItemBase) -> String:
+func rare_name(base: ItemBase) -> String:
 	var seconds: Array = NAME_SECOND.get(base.slot, ["Relic"])
 	return "%s %s" % [NAME_FIRST[rng.randi_range(0, NAME_FIRST.size() - 1)],
 		seconds[rng.randi_range(0, seconds.size() - 1)]]

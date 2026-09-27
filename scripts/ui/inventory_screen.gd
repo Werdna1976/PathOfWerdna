@@ -9,6 +9,8 @@ extends Control
 ## - Sockets are the circles on items. Holding a gem, click a socket to put it
 ##   in (swapping any gem already there); with nothing held, click a filled
 ##   socket to take its gem out. Solid dots are active gems; rings are supports.
+## - Right click an orb to start crafting with it, then left click an item to
+##   apply it. Hold Shift to keep going; right click or Esc stops.
 ## Everything is drawn in _draw(); items are coloured boxes with their names.
 
 const CELL: float = 40.0
@@ -38,10 +40,19 @@ const SOCKET_COLOR: Color = Color(0.55, 0.5, 0.45)
 const ACTIVE_GEM_COLOR: Color = Color(0.85, 0.25, 0.2)
 const SUPPORT_GEM_COLOR: Color = Color(0.95, 0.55, 0.5)
 
+## Reports problems (e.g. "Chaos needs a rare item") for the HUD to show.
+signal message(text: String)
+
 var inventory: Inventory
 var equipment: Equipment
+var skill_bar: SkillBar
+var melee: MeleeAttack
 ## Item currently on the cursor.
 var held: Item
+## Orb stack being applied (it stays in the bag until used up), or null.
+var applying: Item
+
+var _generator := ItemGenerator.new()
 
 var _tooltip: ItemTooltip
 var _font: Font
@@ -71,6 +82,8 @@ func _ready() -> void:
 func bind(player: Node) -> void:
 	inventory = player.get_node("Inventory") as Inventory
 	equipment = player.get_node("Equipment") as Equipment
+	skill_bar = player.get_node("SkillBar") as SkillBar
+	melee = player.get_node("Melee") as MeleeAttack
 	inventory.changed.connect(queue_redraw)
 	equipment.changed.connect(queue_redraw)
 
@@ -88,6 +101,7 @@ func close() -> void:
 	if held != null and not inventory.try_add(held):
 		drop_held()
 	held = null
+	applying = null
 	visible = false
 	_tooltip.visible = false
 
@@ -160,6 +174,49 @@ func socket_at(local: Vector2) -> int:
 
 
 # --- Actions (also used by tests) ----------------------------------------------
+
+## Starts applying an orb stack from the bag.
+func begin_apply(orb: Item) -> void:
+	if Crafting.is_orb(orb):
+		applying = orb
+		queue_redraw()
+
+
+## Applies the current orb to `target`. Keeps going afterwards if `keep_going`.
+func apply_to(target: Item, keep_going: bool = false) -> bool:
+	if applying == null or target == null:
+		return false
+	var ejected: Array[Item] = []
+	var problem: String = Crafting.apply(applying.base.id, target, _generator, ejected)
+	if problem != "":
+		message.emit(problem)
+		return false
+	for gem: Item in ejected:
+		if not inventory.try_add(gem):
+			_drop(gem)
+	applying.stack -= 1
+	if applying.stack <= 0:
+		inventory.remove(applying)
+		applying = null
+	elif not keep_going:
+		applying = null
+	if equipment.slot_of(target) != &"":
+		equipment.notify_changed()
+	inventory.changed.emit()
+	_tooltip.visible = false
+	queue_redraw()
+	return true
+
+
+## The damage estimate for a socketed active gem in equipped gear: {skill, estimate}, or {}.
+func skill_estimate_for(gem_item: Item) -> Dictionary:
+	if skill_bar == null:
+		return {}
+	for skill: SkillInstance in skill_bar.available_skills():
+		if skill.gem_item == gem_item:
+			return {"skill": skill, "estimate": melee.estimate(skill, skill_bar.cooldown_rate)}
+	return {}
+
 
 ## Clicking socket `index` of `item`: socket the held gem (swapping), or take the gem out.
 func click_socket(item: Item, index: int) -> void:
@@ -275,6 +332,22 @@ func _gui_input(event: InputEvent) -> void:
 	var slot: StringName = slot_at(local)
 	var cell: Vector2i = held_grid_pos(local) if held != null else grid_cell_at(local)
 	var in_grid: bool = Rect2(grid_origin(), Vector2(Inventory.WIDTH, Inventory.HEIGHT) * CELL).has_point(local)
+	if applying != null:
+		if click.button_index == MOUSE_BUTTON_LEFT:
+			var target: Dictionary = item_at(local)
+			if not target.is_empty():
+				apply_to(target["item"], click.shift_pressed)
+		else:
+			applying = null
+		accept_event()
+		queue_redraw()
+		return
+	if click.button_index == MOUSE_BUTTON_RIGHT and held == null:
+		var under: Dictionary = item_at(local)
+		if not under.is_empty() and Crafting.is_orb(under["item"]):
+			begin_apply(under["item"])
+			accept_event()
+			return
 	var socket: int = socket_at(local)
 	var socket_ok: bool = socket >= 0 and ((held != null and held.base.is_gem()) 		or (held == null and (item_at(local)["item"] as Item).socketed_gem(socket) != null))
 	if click.button_index == MOUSE_BUTTON_LEFT:
@@ -297,6 +370,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("inventory"):
 		toggle()
 		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("menu") and applying != null:
+		applying = null
+		queue_redraw()
+		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("menu") and visible:
 		close()
 		get_viewport().set_input_as_handled()
@@ -307,7 +384,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _process(_delta: float) -> void:
-	if held != null:
+	if held != null or applying != null:
 		queue_redraw()
 	_update_tooltip()
 
@@ -342,6 +419,11 @@ func _draw() -> void:
 
 	if held != null:
 		_draw_held()
+	if applying != null:
+		var local: Vector2 = get_local_mouse_position()
+		var text: String = "%s (%d)" % [applying.base.name, applying.stack]
+		draw_string(_font, local + Vector2(14.0, -8.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Item.CURRENCY_COLOR)
+		draw_circle(local, 6.0, Item.CURRENCY_COLOR)
 
 
 func _draw_held() -> void:
@@ -390,6 +472,7 @@ func _update_tooltip() -> void:
 	if not visible or held != null:
 		_tooltip.visible = false
 		return
+	# While crafting, the tooltip shows the item under the cursor as the target.
 	var local: Vector2 = get_local_mouse_position()
 	var hit: Dictionary = item_at(local)
 	var item: Item = hit.get("item")
@@ -400,7 +483,8 @@ func _update_tooltip() -> void:
 	if item == null:
 		_tooltip.visible = false
 		return
-	_tooltip.show_item(item, Input.is_action_pressed("show_labels"))
+	var estimate: Dictionary = skill_estimate_for(item) if item.base.is_gem() else {}
+	_tooltip.show_item(item, Input.is_action_pressed("show_labels"), estimate)
 	# Show to the left of the panel, like PoE.
 	var mouse: Vector2 = get_viewport().get_mouse_position()
 	var screen: Vector2 = get_viewport().get_visible_rect().size

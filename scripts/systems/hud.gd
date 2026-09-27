@@ -29,6 +29,9 @@ var _es_fill: ColorRect
 
 var inventory_screen: InventoryScreen
 var character_sheet: CharacterSheet
+var _melee: MeleeAttack
+var _skill_tooltip: ItemTooltip
+var _hovered_slot: int = -1
 
 
 func _ready() -> void:
@@ -91,6 +94,11 @@ func _bind_player() -> void:
 	inventory_screen = InventoryScreen.new()
 	add_child(inventory_screen)
 	inventory_screen.bind(player)
+	inventory_screen.message.connect(_show_message)
+
+	_melee = player.get_node("Melee") as MeleeAttack
+	_skill_tooltip = ItemTooltip.new()
+	add_child(_skill_tooltip)
 
 
 func _process(delta: float) -> void:
@@ -99,6 +107,7 @@ func _process(delta: float) -> void:
 		_message.visible = _message_time > 0.0
 	if _skill_bar == null:
 		return
+	_update_skill_tooltip()
 	for slot: int in SkillBar.SLOT_COUNT:
 		var gem: SkillInstance = _skill_bar.gem_in(slot)
 		var fraction: float = 0.0
@@ -130,6 +139,25 @@ func _on_energy_shield_changed(current: float, maximum: float) -> void:
 	_es_frame.visible = maximum > 0.0
 	if maximum > 0.0:
 		_es_fill.size.x = BAR_SIZE.x * clampf(current / maximum, 0.0, 1.0)
+
+
+func _on_slot_exited(slot: int) -> void:
+	if _hovered_slot == slot:
+		_hovered_slot = -1
+
+
+## Skill tooltip above the hovered skill bar slot (refreshed so it tracks gear changes).
+func _update_skill_tooltip() -> void:
+	var skill: SkillInstance = _skill_bar.gem_in(_hovered_slot) if _hovered_slot >= 0 else null
+	if skill == null:
+		_skill_tooltip.visible = false
+		return
+	_skill_tooltip.show_skill(skill, _melee.estimate(skill, _skill_bar.cooldown_rate))
+	var screen: Vector2 = get_viewport().get_visible_rect().size
+	var total_width: float = SkillBar.SLOT_COUNT * SLOT_SIZE.x + (SkillBar.SLOT_COUNT - 1) * 6.0
+	var x: float = screen.x * 0.5 - total_width * 0.5 + _hovered_slot * (SLOT_SIZE.x + 6.0)
+	_skill_tooltip.position = Vector2(clampf(x, 0.0, screen.x - _skill_tooltip.size.x),
+		screen.y - MARGIN - SLOT_SIZE.y - _skill_tooltip.size.y - 8.0)
 
 
 func _on_life_changed(current: float, maximum: float) -> void:
@@ -237,6 +265,8 @@ func _build_skill_bar() -> void:
 		frame.position = Vector2(-total_width * 0.5 + slot * (SLOT_SIZE.x + 6.0), -MARGIN - SLOT_SIZE.y)
 		frame.tooltip_text = "Click to change the skill in this slot"
 		frame.gui_input.connect(_on_slot_input.bind(slot))
+		frame.mouse_entered.connect(func() -> void: _hovered_slot = slot)
+		frame.mouse_exited.connect(_on_slot_exited.bind(slot))
 		add_child(frame)
 
 		var cooldown := ColorRect.new()

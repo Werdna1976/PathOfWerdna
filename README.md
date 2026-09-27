@@ -24,7 +24,9 @@ C:/GoDot/Godot_v4.7.2-stable_win64.exe --path C:/GoDot/Projects/Godot-Opus-ARPG
 | 1 / 2 | Health potion / mana potion | **Working** |
 | 3–5 | Future potions | Bound, no behavior yet |
 | I | Inventory: click to pick up, place, swap or equip; right-click to quick equip or unequip; click the world while holding an item to drop it | **Working** |
-| C | Character sheet | **Working** |
+| C | Character sheet (starts with each slotted skill's DPS) | **Working** |
+| Right click an orb, then left click an item | Craft; hold Shift to keep using the orb, right click or Esc to stop | **Working** |
+| Hover a skill bar slot | Skill tooltip with damage per hit, crits, uses per second and DPS | **Working** |
 | P | Passive tree | Bound, no behavior yet |
 | Alt (hold) | In a tooltip, show each affix's tier | **Working** |
 | Left click a ground label | Walk over and pick the item up | **Working** |
@@ -193,6 +195,24 @@ Keys are bound by physical location, so they stay in the same place on non-QWERT
   in the bag until vendors and quests exist.
 - **Gem levels** always show 1. Gem XP arrives with character XP in Milestone 5.
 
+## Crafting and skill damage
+
+- **Orbs** (`Crafting`): right click an orb in the inventory, then left click an item. Shift
+  keeps the orb on the cursor. A wrong target shows why and doesn't spend the orb.
+  - **Transmutation:** normal → magic.
+  - **Augmentation:** adds a mod to a magic item with room.
+  - **Alteration:** rerolls a magic item.
+  - **Regal:** magic → rare, keeping its mods and adding one.
+  - **Chaos:** rerolls a rare or legendary.
+  - **Ascension:** rare → legendary, keeping its mods and adding 1–2 with the tier bias.
+  - **Scouring:** removes all mods, keeping the implicit.
+  - **Jeweller's:** always changes the socket count. Gems in removed sockets go back to the
+    bag.
+- **Skill damage** (`MeleeAttack.estimate`) uses the same formula as real hits. It includes
+  weapon and gear damage, supports, crits, attack speed and cooldowns. It appears on skill bar
+  tooltips, on tooltips of active gems socketed in gear, and as a Skills section at the top of
+  the character sheet.
+
 ### Why a perspective camera
 
 The camera uses **perspective with a narrow 35° FOV** instead of orthographic because:
@@ -266,6 +286,16 @@ C:/GoDot/Godot_v4.7.2-stable_win64.exe --headless --path C:/GoDot/Projects/Godot
 The gems test covers the starting kit, socketing and swapping, support compatibility, mana
 cost multipliers, the skill bar following gem changes, exact damage with Added Fire and
 Brutality, Melee Splash, Life Leech, Default Attack, and gem tooltips.
+
+Run the crafting test:
+
+```bash
+C:/GoDot/Godot_v4.7.2-stable_win64.exe --headless --path C:/GoDot/Projects/Godot-Opus-ARPG -s res://tests/test_crafting.gd
+```
+
+It covers every orb's rules and results, keeping mods on upgrades, item level limits on
+rerolls, Jeweller's ejecting gems, the inventory crafting flow with Shift, and the damage and
+DPS estimates.
 
 It checks that:
 - every Input Map action exists and is bound

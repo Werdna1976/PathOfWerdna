@@ -81,6 +81,38 @@ func approach_distance(skill: SkillInstance = null) -> float:
 	return (skill.reach if skill != null else reach) + 0.1
 
 
+## Expected numbers for `skill` with the current weapon, gear and supports,
+## using the same formula as a real hit. `cooldown_rate` comes from the skill bar.
+## Keys: hit_min, hit_max, average_hit, crit_chance, crit_multiplier,
+## uses_per_second, dps, area_radius, leech_per_hit.
+func estimate(skill: SkillInstance, cooldown_rate: float = 1.0) -> Dictionary:
+	var phys_lo: float = damage_min * skill.more_physical
+	var phys_hi: float = damage_max * skill.more_physical
+	var fire_lo: float = fire_min + damage_min * skill.extra_fire_percent / 100.0
+	var fire_hi: float = fire_max + damage_max * skill.extra_fire_percent / 100.0
+	if skill.no_elemental:
+		fire_lo = 0.0
+		fire_hi = 0.0
+	var lo: float = (phys_lo + fire_lo) * skill.damage_multiplier
+	var hi: float = (phys_hi + fire_hi) * skill.damage_multiplier
+	var average: float = (lo + hi) * 0.5
+	var crit_factor: float = 1.0 + crit_chance / 100.0 * (crit_multiplier / 100.0 - 1.0)
+	var uses: float = speed_multiplier / (skill.windup + skill.recovery)
+	if skill.cooldown > 0.0:
+		uses = minf(uses, cooldown_rate / skill.cooldown)
+	return {
+		"hit_min": lo,
+		"hit_max": hi,
+		"average_hit": average * crit_factor,
+		"crit_chance": crit_chance,
+		"crit_multiplier": crit_multiplier,
+		"uses_per_second": uses,
+		"dps": average * crit_factor * uses,
+		"area_radius": skill.reach * (area_multiplier if skill.hits_all else 1.0),
+		"leech_per_hit": average * crit_factor * skill.leech_percent / 100.0,
+	}
+
+
 ## Starts a swing toward `direction`. Returns false if already swinging.
 ## Pass `leap_to` to carry the body to that point during the wind-up.
 func swing(direction: Vector3, skill: SkillInstance = null, leap_to: Vector3 = Vector3.INF) -> bool:
