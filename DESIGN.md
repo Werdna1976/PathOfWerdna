@@ -3,7 +3,10 @@
 An isometric action RPG in the spirit of Path of Exile, built in **Godot 4.7.2**. Werdna is the hero.
 
 ## Decisions so far
-- **Engine:** Godot 4.7.2, 3D, placeholder shapes until the gameplay feels good.
+- **Engine:** Godot 4.7.2, 3D.
+- **Art and audio:** procedural for now (low-poly generated meshes, generated textures, SVG
+  icons and synthesized sound, all rebuilt by the scripts in `tools/`). They're built as
+  swappable pieces, so real assets can replace them file by file (see `docs/WORLD_KIT.md`).
 - **Tone:** relatively dark. Low light, torch pools, fog and muted colors.
 - **Scope:** a light version of Path of Exile, not a full clone.
 - **Starting class:** Warrior (STR). Later classes are an archer or thief (DEX) and a spellcaster (INT).
@@ -232,11 +235,20 @@ res://
    - **4b, inventory and equipment:** the inventory screen, equipping the 10 slots, and gear stats applying to Werdna. *(Done.)*
    - **4c, sockets and gems:** socketing gems, support gems, and the skill bar drawing from socketed gems. *(Done. Gem XP moved to Milestone 5.)*
 5. **Town and zones (done early):** Werdna's Camp with a gear vendor and a gem vendor, and zone travel to the Goblin Shore. The stash and the portal skill come later.
+   - **Art and audio pass (done):**
+     - item tiers up to item level 84 (186 bases, 46 affixes)
+     - the world kit: materials, shaders, props, atmosphere, biomes, scatter and the zone template
+     - Werdna and goblin models, with equipment visuals and procedural animation
+     - item icons
+     - generated sound effects, music and ambience, with the Audio autoload
+     - both zones dressed with the kit
 6. **Progression:** XP, levels, gem XP and levels, attributes, and the warrior region of the skill tree.
 7. **Content:** more enemies, a boss, and procedural map pieces.
 
 ## Future polish
-- **Item art:** inventory icons and distinct ground models per item type. Items are coloured boxes with names for now.
+- **Item art:** icons are done (per base type). Distinct ground models per item type are still to come; ground items are glowing tiles with a floating icon.
+- **World:** a forest biome exists (`data/biomes/forest.tres`) for Goblin Hollow. It still needs its own music track; it borrows the shore music for now.
+- **Performance:** scattered decor is one node per prop (about 700 draw calls per zone). MultiMesh batching for grass and pebbles is the next step if zones grow.
 
 ## Open questions
 1. **Orb economy:** exact drop rates, vendor prices, and how shards work. These will be tuned during the Loot milestone.

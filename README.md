@@ -6,7 +6,7 @@ See [DESIGN.md](DESIGN.md) for the full design; this README covers how to run wh
 ## Running
 
 1. Open Godot 4.7.2, choose **Import**, and select this folder's `project.godot`.
-2. Press **F5** (Run Project). The main scene is `scenes/levels/test_arena.tscn`.
+2. Press **F5** (Run Project). The main scene is `scenes/main.tscn`, which starts in Werdna's Camp.
 
 From a terminal:
 
@@ -44,7 +44,8 @@ Keys are bound by physical location, so they stay in the same place on non-QWERT
 - **Lighting:** very dim cool ambient light, a weak moonlight, exponential depth fog plus
   volumetric fog, ACES tonemapping and light glow. Four warm torches with shadows sit on the
   pillars, and Werdna carries a faint lantern so they stay readable between torch pools.
-- **Player** (`scenes/player/player.tscn`): a capsule with a red "nose" showing facing.
+- **Player** (`scenes/player/player.tscn`): now Werdna's procedural model (see Characters); it
+  started as a capsule with a red "nose" showing facing.
   - `NavMovement` moves the body along a `NavigationAgent3D` path at 5 units/s, turns
     smoothly, and stops at the target. It's written so enemies can reuse it.
   - `ClickMoveInput` raycasts from the camera on left click and keeps updating the target
@@ -100,11 +101,23 @@ Keys are bound by physical location, so they stay in the same place on non-QWERT
 ## Milestone 4a: "Items and drops"
 
 - **Item data lives in JSON**, so a large table stays readable and easy to tune in one place:
-  - `data/items/bases.json` has 50 bases: axes, swords and maces (one- and two-handed), 2
-    shields, chest, helm, gloves and boots in AR/EV/ES and hybrid versions, 6 rings, 4 amulets,
-    4 charms and 8 orbs.
-  - `data/items/affixes.json` has 40 affixes with 2–6 tiers each.
-  - `ItemDB` loads and caches both.
+  - `data/items/bases.json` has 186 bases, with drop levels from 1 to about 62:
+    - 5 tiers for each weapon class: one- and two-handed axes, swords and maces (for example
+      Rusted Hatchet → Jade Hatchet → Boarding Axe → Cleaver → Broad Axe).
+    - 4 tiers of shields for each defence type: tower (AR), buckler (EV), spirit (ES), round
+      (AR/EV), kite (AR/ES) and spiked (EV/ES).
+    - 4 tiers of chest, helm, gloves and boots for each of AR, EV, ES and the three hybrids.
+    - 11 rings, 8 amulets and 8 charms, with fitting implicits (rarity, mana, crit, life,
+      recoup and so on).
+    - 9 currency items: the 8 orbs and the Transmutation Shard.
+    - Base damage and defences grow with drop level.
+  - `data/items/affixes.json` has 46 affixes with 3–8 tiers each. Every top tier needs item
+    level 75–84. Newer affixes:
+    - local % Armour, % Evasion and % Energy Shield
+    - Stun Threshold
+    - Rarity on rings and amulets
+    - Life on Kill
+  - `ItemDB` loads and caches both. Every base can set an `icon` (see Item icons below).
 - **Rolling** (`ItemGenerator`):
   - Rarity weights are normal 62%, magic 30%, rare 7.5% and legendary 0.5%.
   - Affix counts: magic 1–2 (up to 1 prefix and 1 suffix), rare 3–4 (up to 2/2), legendary
@@ -121,7 +134,8 @@ Keys are bound by physical location, so they stay in the same place on non-QWERT
 - **Drops:** each goblin (`LootDropper`) has a 35% item chance and a 15% currency chance. Item
   level is the area level, set by the `AreaInfo` node (5 in the test arena).
 - **On the ground:**
-  - Items show as a tile coloured by rarity. Rares and legendaries also get a light beam.
+  - Items show as a tile glowing in their rarity colour, with the item's icon floating above.
+    Rares and legendaries also get a light beam.
   - `GroundLabels` draws clickable labels and pushes overlapping ones upward.
   - Hovering a label shows the item tooltip; holding Alt adds each affix's tier.
   - Clicking a label walks Werdna over, and the item goes into his inventory.
@@ -243,8 +257,9 @@ Keys are bound by physical location, so they stay in the same place on non-QWERT
   with rocks, a wreck and 10 goblins that respawn after 45 s. The gate on the west side leads
   back to camp.
 - **Starting orbs:** Werdna starts with 4 Transmutation and 2 Alteration Orbs to try the shops.
-- **The zone layouts are placeholder blockouts,** editable in the Godot editor like any scene.
-  `scenes/levels/test_arena.tscn` stays as the standalone arena the older tests use.
+- **Both zones are built with the world kit** (see below), and they can be edited in the Godot
+  editor like any scene. `scenes/levels/test_arena.tscn` stays as the standalone arena the older
+  tests use.
 
 ### Why a perspective camera
 
@@ -263,7 +278,136 @@ The camera uses **perspective with a narrow 35° FOV** instead of orthographic b
   Recast lifts the navmesh two cells above the floor (0.2), so the agent's `path_height_offset`
   is set to 0.2 to keep its waypoint checks accurate.
 
+## World kit
+
+Reusable building blocks for zones live in `scripts/kit/`, `scenes/kit/`, `assets/` and
+`data/biomes/`. See [docs/WORLD_KIT.md](docs/WORLD_KIT.md) for how to build a new zone and how to
+swap in real art later.
+
+- **Materials:** tools/gen_textures.gd generates 11 tileable textures, each with a normal map
+  derived from its height field: sand, wet sand, dirt, packed earth, grass, stone, cobbles,
+  planks, cliff rock, bark and cloth. Their triplanar materials multiply in vertex colour, so
+  one material serves many tints.
+- **Shaders:**
+  - water, with swell, depth colour and a glowing surf line
+  - foliage sway and cloth sway
+  - a two-material ground blend that follows a gradient, a circle or a painted mask
+- **24 props** (`KitProp`) built from low-poly procedural meshes:
+  - torches (post and wall), a campfire and a brazier, each with a flickering light and
+    flame, ember and smoke particles
+  - boulders, rock clusters, cliff chunks and pebbles
+  - dead trees and pines, bushes and grass
+  - tents, palisades and gates
+  - crates, barrels, sacks and market stalls
+  - driftwood, a shipwreck and banners
+  - `variant` changes each prop's shape, and `collision` off makes it decorative.
+- **Atmosphere** (`AmbientEffect`): dust motes, fireflies, ground mist, falling ash and sea spray.
+- **Biomes** (`data/biomes/camp.tres`, `shore.tres`, `forest.tres`): environment, fog and light
+  colours, ground materials, prop and scatter lists, ambient effects, and music and ambience ids.
+- **PropScatter:** fills a rectangle or polygon with weighted props. It's deterministic from a
+  seed, avoids ScatterExclusion areas, markers, exits and vendors, and places decorative props
+  without colliders.
+- **Zone and template:** a `Zone` root applies its biome. `scenes/kit/zone_template.tscn` is the
+  starting point for new zones.
+
+## Characters
+
+- **Werdna** (`WarriorModel`) and the **goblin** (`GoblinModel`) are low-poly procedural models on
+  a small joint rig. They sit at `Visual/Body` in the player and goblin scenes, and the right
+  arm lives in `Visual/WeaponPivot`, so SwingAnimator's sweep reads as a slash.
+- **EquipmentVisuals** follows `Equipment.changed`:
+  - a weapon model for each type, one- or two-handed (axe, sword or mace)
+  - a shield model in the left hand
+  - an armour style for the body armour's defence type: plate (AR), leather (EV), robe (ES),
+    scale, chain with a tabard, or padded
+  - helm, glove and boot styles in the same way
+- **CharacterAnimator** adds a walk cycle driven by velocity, a hip bob and lean, idle
+  breathing, a torso twist into swings, a raised blade at rest, and footstep events. Deaths and
+  leaps still use the existing tweens on `Visual`.
+- **HitFeedback** flashes the whole model through a temporary additive overlay.
+- **Readability:** rim lighting, a glowing visor slit and robe trim, and the goblins' glowing
+  eyes keep the models readable in the dark.
+- **Vendors** reuse the warrior model: Greta wears leather and holds a hammer, and Ilsa wears a
+  robe and circlet.
+
+## Item icons
+
+- tools/gen_icons.gd writes 60 stylised SVG icons into `assets/icons/`:
+  - every weapon class, one- and two-handed
+  - six shield styles
+  - chest, helm, gloves and boots for each defence type and hybrid
+  - ring, amulet and the four charms
+  - every orb and the shard
+  - each active and support gem
+- **ItemIcons** picks an icon in this order: the base's `icon` field, then a file named after
+  the base id, then its slot, type and defence tags. New bases get a sensible default, and
+  per-base art can be dropped in later.
+- Icons show in the inventory and vendor screens (framed by rarity colour, with currency stack
+  counts), on ground labels, and as a floating billboard over ground items.
+
+## Audio
+
+- tools/gen_audio.gd synthesizes everything in `assets/audio/`:
+  - **40 sound effects:**
+    - combat: swings, flesh and armour hits, crits, blocks and evades
+    - voices: goblin grunts and death, player hurt and death
+    - loot: drops by rarity, with chimes for rares and legendaries, the orb clink and pickup
+    - the potion, the skill-fail buzz and zone travel
+    - vendor coins and UI clicks, including inventory open and close
+    - footsteps on sand and dirt
+  - **Two original 120 s looping tracks:**
+    - the camp: a Karplus-Strong plucked guitar arpeggio in D minor over a low drone, with echoes
+    - the shore: a dark drone, a low string pad, surf and distant bells
+  - **Ambience loops:** campfire, sea and wind.
+- **The `Audio` autoload** (`scripts/systems/audio.gd`):
+  - It uses the Music, SFX and Ambience buses (`default_bus_layout.tres`), with music under
+    the effects.
+  - Music and ambience crossfade on zone change, from the Biome or AreaInfo ids.
+  - Positional effects come from a pool of AudioStreamPlayer3D with random pitch, and the
+    listener follows the player.
+  - It hooks itself to the existing signals as nodes enter the tree, so no scene needs audio
+    nodes. The hooks cover swings, hits, damage and deaths, blocks, drops, pickups, potions,
+    skill failures, zone travel, buying and selling, the inventory and footsteps.
+- **Headless runs** set up every stream but never start playback.
+
+## Regenerating assets
+
+Every generated asset has its generator in `tools/`. After regenerating, run the import:
+
+```bash
+C:/GoDot/Godot_v4.7.2-stable_win64.exe --headless --path C:/GoDot/Projects/Godot-Opus-ARPG -s res://tools/gen_textures.gd
+C:/GoDot/Godot_v4.7.2-stable_win64.exe --headless --path C:/GoDot/Projects/Godot-Opus-ARPG -s res://tools/gen_icons.gd
+C:/GoDot/Godot_v4.7.2-stable_win64.exe --headless --path C:/GoDot/Projects/Godot-Opus-ARPG -s res://tools/gen_audio.gd
+C:/GoDot/Godot_v4.7.2-stable_win64.exe --headless --path C:/GoDot/Projects/Godot-Opus-ARPG --import
+```
+
+Review tools:
+- `tools/screenshot.gd` takes a windowed screenshot of any scene, or of the game at a spot in
+  a zone. Its options include `--zone`, `--at`, `--inventory` and `--drops`, and it prints FPS
+  and draw calls.
+- `tools/character_preview.tscn` lines up every armour style and some goblins.
+- `tools/icon_sheet.gd` renders all icons on one sheet.
+- `tools/audio_report.gd` prints levels and loop seams and draws spectrograms.
+
+Screenshots are saved in `tests/shots/`.
+
 ## Tests
+
+Run every suite:
+
+```bash
+for t in walk fight skills loot equipment gems crafting town kit models icons audio zones; do C:/GoDot/Godot_v4.7.2-stable_win64.exe --headless --path C:/GoDot/Projects/Godot-Opus-ARPG -s res://tests/test_$t.gd | grep RESULT; done
+```
+
+The art and audio suites cover:
+- `test_kit`: materials, all props, decorative collision, scatter determinism and exclusions,
+  biomes, and the zone template's navmesh
+- `test_models`: the model contract, equipment visuals for each weapon, shield and armour
+  type, the walk animation and hit flashes
+- `test_icons`: every base, orb and gem has an icon, and icons show on ground items and labels
+- `test_audio`: the autoload, buses, every stream and loop, and zone music changes
+- `test_zones`: reachability of every exit, spawn and vendor from every entry, markers clear of
+  props, scatter coverage, and the shadowed-light budget
 
 Run the headless Milestone 1 test:
 
@@ -360,9 +504,12 @@ This saves the game camera's view to `tests/screenshot_m1.png`.
 ## Layout
 
 ```
-scenes/   player/, levels/, ui/
-scripts/  components/ (reusable node behaviors), systems/ (level-wide services)
-data/     .tres game data (from Milestone 3 on)
-assets/   art and audio (placeholders for now)
-tests/    headless test scripts
+scenes/   player/, enemies/, levels/, ui/, kit/ (props, effects, zone template)
+scripts/  components/ (reusable node behaviors), systems/ (level-wide services, Audio),
+          characters/ (models, gear models, animator), kit/ (world kit), items/, ui/
+data/     items/ JSON tables, gems/, potions/, biomes/
+assets/   textures/, materials/, shaders/, icons/, audio/ (all generated by tools/)
+tools/    asset generators and review tools
+docs/     WORLD_KIT.md
+tests/    headless test scripts; shots/ for screenshots
 ```
