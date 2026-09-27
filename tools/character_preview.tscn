@@ -1,0 +1,27 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/character_preview.gd" id="1_preview"]
+[ext_resource type="Script" path="res://scripts/kit/zone.gd" id="2_zone"]
+[ext_resource type="Resource" path="res://data/biomes/camp.tres" id="3_biome"]
+[ext_resource type="Script" path="res://scripts/kit/kit_ground.gd" id="4_ground"]
+[ext_resource type="PackedScene" path="res://scenes/kit/props/torch.tscn" id="5_torch"]
+
+[node name="CharacterPreview" type="Node3D"]
+script = ExtResource("2_zone")
+biome = ExtResource("3_biome")
+bounds = Vector3(20, 4, 20)
+
+[node name="Ground" type="StaticBody3D" parent="."]
+script = ExtResource("4_ground")
+size = Vector2(24, 16)
+
+[node name="TorchA" parent="." instance=ExtResource("5_torch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 2.5)
+light_energy = 4.0
+
+[node name="TorchB" parent="." instance=ExtResource("5_torch")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 2.5)
+light_energy = 4.0
+
+[node name="Models" type="Node3D" parent="."]
+script = ExtResource("1_preview")

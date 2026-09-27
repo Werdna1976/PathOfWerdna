@@ -1,31 +1,48 @@
 class_name HitFeedback
 extends Node
-## Makes damage readable: flashes the body mesh and pops a floating number.
+## Makes damage readable: flashes the body and pops a floating number.
+## With `flash_root` set, every mesh under it flashes (a whole character model,
+## its weapon and shield included), using a shared additive overlay that is
+## only attached for the length of the flash. Otherwise `body_mesh` flashes
+## through its own material, as with the old capsule bodies.
 
 const NUMBER_RISE: float = 1.2
 const NUMBER_LIFETIME: float = 0.8
+const FLASH_TIME: float = 0.15
 
 @export var health: Health
 ## Optional. Shows "Block" / "Evade" when a hit is avoided.
 @export var defenses: Defenses
+## Every MeshInstance3D under this node flashes on a hit.
+@export var flash_root: Node3D
+## Used when there is no flash_root: a single mesh with a StandardMaterial3D override.
 @export var body_mesh: MeshInstance3D
 @export var number_color: Color = Color(1.0, 0.95, 0.85)
 @export var number_height: float = 2.0
 
 var _flash_material: StandardMaterial3D
+var _overlay: StandardMaterial3D
 var _flash_tween: Tween
+var _flashing: Array[MeshInstance3D] = []
 
 
 func _ready() -> void:
 	health.damaged.connect(_on_damaged)
 	if defenses != null:
 		defenses.avoided.connect(func(how: String) -> void: _spawn_text(how, Color(0.8, 0.8, 0.8)))
-	# Each instance gets its own material so flashes don't bleed across bodies.
-	_flash_material = (body_mesh.material_override as StandardMaterial3D).duplicate() as StandardMaterial3D
-	_flash_material.emission_enabled = true
-	_flash_material.emission = Color(1.0, 0.9, 0.8)
-	_flash_material.emission_energy_multiplier = 0.0
-	body_mesh.material_override = _flash_material
+	if flash_root != null:
+		_overlay = StandardMaterial3D.new()
+		_overlay.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		_overlay.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_overlay.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		_overlay.albedo_color = Color(1.0, 0.9, 0.8, 0.0)
+	elif body_mesh != null:
+		# Each instance gets its own material so flashes don't bleed across bodies.
+		_flash_material = (body_mesh.material_override as StandardMaterial3D).duplicate() as StandardMaterial3D
+		_flash_material.emission_enabled = true
+		_flash_material.emission = Color(1.0, 0.9, 0.8)
+		_flash_material.emission_energy_multiplier = 0.0
+		body_mesh.material_override = _flash_material
 
 
 func _on_damaged(amount: float) -> void:
@@ -36,9 +53,27 @@ func _on_damaged(amount: float) -> void:
 func _flash() -> void:
 	if _flash_tween != null:
 		_flash_tween.kill()
-	_flash_material.emission_energy_multiplier = 0.6
 	_flash_tween = create_tween()
-	_flash_tween.tween_property(_flash_material, "emission_energy_multiplier", 0.0, 0.15)
+	if _overlay != null:
+		_clear_overlay()
+		for node: Node in flash_root.find_children("*", "MeshInstance3D", true, false):
+			var mesh: MeshInstance3D = node as MeshInstance3D
+			if mesh.material_overlay == null:
+				mesh.material_overlay = _overlay
+				_flashing.append(mesh)
+		_overlay.albedo_color.a = 0.55
+		_flash_tween.tween_property(_overlay, "albedo_color:a", 0.0, FLASH_TIME)
+		_flash_tween.tween_callback(_clear_overlay)
+	elif _flash_material != null:
+		_flash_material.emission_energy_multiplier = 0.6
+		_flash_tween.tween_property(_flash_material, "emission_energy_multiplier", 0.0, FLASH_TIME)
+
+
+func _clear_overlay() -> void:
+	for mesh: MeshInstance3D in _flashing:
+		if is_instance_valid(mesh) and mesh.material_overlay == _overlay:
+			mesh.material_overlay = null
+	_flashing.clear()
 
 
 func _spawn_number(amount: float) -> void:

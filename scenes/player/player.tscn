@@ -21,33 +21,13 @@
 [ext_resource type="Script" path="res://scripts/components/defenses.gd" id="21_def"]
 [ext_resource type="Script" path="res://scripts/components/character_stats.gd" id="22_stats"]
 [ext_resource type="Script" path="res://scripts/components/npc_interaction.gd" id="23_npc"]
+[ext_resource type="Script" path="res://scripts/characters/warrior_model.gd" id="24_model"]
+[ext_resource type="Script" path="res://scripts/characters/character_animator.gd" id="25_anim"]
+[ext_resource type="Script" path="res://scripts/components/equipment_visuals.gd" id="26_visuals"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.4
 height = 1.8
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
-radius = 0.4
-height = 1.8
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_body"]
-albedo_color = Color(0.62, 0.52, 0.42, 1)
-roughness = 0.8
-
-[sub_resource type="BoxMesh" id="BoxMesh_nose"]
-size = Vector3(0.16, 0.16, 0.36)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nose"]
-albedo_color = Color(0.75, 0.2, 0.15, 1)
-roughness = 0.6
-
-[sub_resource type="BoxMesh" id="BoxMesh_sword"]
-size = Vector3(0.08, 0.06, 1.3)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sword"]
-albedo_color = Color(0.72, 0.74, 0.78, 1)
-metallic = 0.8
-roughness = 0.35
 
 [node name="Player" type="CharacterBody3D" groups=["player"]]
 collision_layer = 2
@@ -59,23 +39,11 @@ shape = SubResource("CapsuleShape3D_body")
 
 [node name="Visual" type="Node3D" parent="."]
 
-[node name="Body" type="MeshInstance3D" parent="Visual"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-mesh = SubResource("CapsuleMesh_body")
-material_override = SubResource("StandardMaterial3D_body")
-
-[node name="Nose" type="MeshInstance3D" parent="Visual"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, -0.42)
-mesh = SubResource("BoxMesh_nose")
-material_override = SubResource("StandardMaterial3D_nose")
-
 [node name="WeaponPivot" type="Node3D" parent="Visual"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 1.42, 0)
 
-[node name="Sword" type="MeshInstance3D" parent="Visual/WeaponPivot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.0)
-mesh = SubResource("BoxMesh_sword")
-material_override = SubResource("StandardMaterial3D_sword")
+[node name="Body" type="Node3D" parent="Visual"]
+script = ExtResource("24_model")
 
 [node name="Lantern" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
@@ -149,11 +117,11 @@ mana = NodePath("../Mana")
 potions = NodePath("../PotionBelt")
 visual = NodePath("../Visual")
 
-[node name="HitFeedback" type="Node" parent="." node_paths=PackedStringArray("health", "defenses", "body_mesh")]
+[node name="HitFeedback" type="Node" parent="." node_paths=PackedStringArray("health", "defenses", "flash_root")]
 script = ExtResource("8_feedback")
 health = NodePath("../Health")
 defenses = NodePath("../Defenses")
-body_mesh = NodePath("../Visual/Body")
+flash_root = NodePath("../Visual")
 number_color = Color(1, 0.35, 0.3, 1)
 number_height = 2.3
 
@@ -161,6 +129,14 @@ number_height = 2.3
 script = ExtResource("9_swing")
 melee = NodePath("../Melee")
 pivot = NodePath("../Visual/WeaponPivot")
+rest_degrees = -35.0
+forehand = true
+
+[node name="CharacterAnimator" type="Node" parent="." node_paths=PackedStringArray("model", "health", "weapon_pivot")]
+script = ExtResource("25_anim")
+model = NodePath("../Visual/Body")
+health = NodePath("../Health")
+weapon_pivot = NodePath("../Visual/WeaponPivot")
 
 [node name="Inventory" type="Node" parent="."]
 script = ExtResource("18_inv")
@@ -176,6 +152,11 @@ click_move = NodePath("../ClickMoveInput")
 [node name="Equipment" type="Node" parent="." node_paths=PackedStringArray("inventory")]
 script = ExtResource("20_equip")
 inventory = NodePath("../Inventory")
+
+[node name="EquipmentVisuals" type="Node" parent="." node_paths=PackedStringArray("equipment", "model")]
+script = ExtResource("26_visuals")
+equipment = NodePath("../Equipment")
+model = NodePath("../Visual/Body")
 
 [node name="CharacterStats" type="Node" parent="." node_paths=PackedStringArray("equipment", "health", "mana", "defenses", "melee", "movement", "potions", "skill_bar")]
 script = ExtResource("22_stats")
