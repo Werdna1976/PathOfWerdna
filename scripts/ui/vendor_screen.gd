@@ -7,6 +7,8 @@ extends Control
 ## Closes with Esc, or when the player walks away from the vendor.
 
 signal message(text: String)
+signal bought(item: Item)
+signal sold(item: Item)
 
 const CELL: float = 40.0
 const PAD: float = 16.0
@@ -93,6 +95,7 @@ func buy(item: Item) -> bool:
 	inventory.try_add(vendor.take(item))
 	_relayout()
 	queue_redraw()
+	bought.emit(item)
 	return true
 
 
@@ -113,6 +116,7 @@ func sell_held() -> bool:
 	if not Shop.give(inventory, value["id"], value["amount"]):
 		message.emit("Inventory full: some payment was lost")
 	queue_redraw()
+	sold.emit(item)
 	return true
 
 

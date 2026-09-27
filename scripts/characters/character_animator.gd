@@ -7,6 +7,9 @@ extends Node
 ## - during a swing the torso twists after the weapon.
 ## Death and leaps are left to the existing tweens on Visual, which this never touches.
 
+## Emitted each time a foot lands while walking (for footstep sounds).
+signal footstep
+
 @export var model: CharacterModel
 @export var health: Health
 ## The pivot SwingAnimator sweeps; it bobs with the hips.
@@ -57,7 +60,11 @@ func _process(delta: float) -> void:
 	var ground := Vector3(_body.velocity.x, 0.0, _body.velocity.z)
 	_speed = lerpf(_speed, ground.length(), 1.0 - exp(-10.0 * delta))
 	var move: float = clampf(_speed / walk_speed, 0.0, 1.0)
+	var before: float = _phase
 	_phase = fmod(_phase + _speed / stride * TAU * delta, TAU)
+	# A foot lands at phase 0 and at PI (each half of the stride).
+	if move > 0.3 and (int(before / PI) != int(_phase / PI) or _phase < before):
+		footstep.emit()
 	_time += delta
 	var s: float = sin(_phase)
 

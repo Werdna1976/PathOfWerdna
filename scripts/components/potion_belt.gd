@@ -5,6 +5,7 @@ extends Node
 
 signal changed
 signal drink_failed(reason: String)
+signal drank(index: int)
 
 const ACTIONS: Array[StringName] = [&"potion_1", &"potion_2", &"potion_3", &"potion_4", &"potion_5"]
 ## Called on every node in this group when an enemy dies.
@@ -45,6 +46,7 @@ func drink(index: int) -> bool:
 	charges[index] -= potion.charges_per_use
 	_active[index] = potion.duration
 	changed.emit()
+	drank.emit(index)
 	return true
 
 
