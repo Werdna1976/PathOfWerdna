@@ -1,0 +1,68 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/zone.gd" id="1_zone"]
+[ext_resource type="Resource" path="res://data/biomes/forest.tres" id="2_biome"]
+[ext_resource type="Script" path="res://scripts/systems/area_info.gd" id="3_area"]
+[ext_resource type="Script" path="res://scripts/systems/runtime_nav_baker.gd" id="4_nav"]
+[ext_resource type="Script" path="res://scripts/kit/kit_ground.gd" id="5_ground"]
+[ext_resource type="Script" path="res://scripts/kit/prop_scatter.gd" id="6_scatter"]
+[ext_resource type="Script" path="res://scripts/kit/scatter_exclusion.gd" id="7_exclusion"]
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_1"]
+geometry_parsed_geometry_type = 1
+geometry_collision_mask = 1
+cell_height = 0.1
+agent_height = 2.0
+agent_max_climb = 0.3
+agent_radius = 0.5
+
+[node name="ZoneTemplate" type="Node3D"]
+script = ExtResource("1_zone")
+biome = ExtResource("2_biome")
+bounds = Vector3(40, 5, 40)
+
+[node name="AreaInfo" type="Node" parent="."]
+script = ExtResource("3_area")
+area_level = 1
+zone_name = "New Zone"
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_1")
+script = ExtResource("4_nav")
+
+[node name="Ground" type="StaticBody3D" parent="NavigationRegion3D"]
+script = ExtResource("5_ground")
+size = Vector2(40, 40)
+
+[node name="Props" type="Node3D" parent="NavigationRegion3D"]
+
+[node name="PropScatter" type="Node3D" parent="NavigationRegion3D"]
+script = ExtResource("6_scatter")
+source = 1
+density = 0.02
+size = Vector2(36, 36)
+
+[node name="Decor" type="Node3D" parent="."]
+script = ExtResource("6_scatter")
+source = 2
+scatter_seed = 2
+density = 0.25
+size = Vector2(38, 38)
+marker_margin = 1.0
+
+[node name="Exclusions" type="Node3D" parent="."]
+
+[node name="MainPath" type="Node3D" parent="Exclusions"]
+script = ExtResource("7_exclusion")
+shape = 2
+radius = 2.0
+path_points = PackedVector2Array(-20, 0, 0, 0, 20, 0)
+
+[node name="Lights" type="Node3D" parent="."]
+
+[node name="Entries" type="Node3D" parent="."]
+
+[node name="start" type="Marker3D" parent="Entries"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0, 0)
+
+[node name="Exits" type="Node3D" parent="."]

@@ -1,0 +1,40 @@
+[gd_resource type="ShaderMaterial" load_steps=8 format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/ground_blend.gdshader" id="1_shader"]
+[ext_resource type="Texture2D" path="res://assets/textures/sand_albedo.png" id="2_a"]
+[ext_resource type="Texture2D" path="res://assets/textures/sand_normal.png" id="3_an"]
+[ext_resource type="Texture2D" path="res://assets/textures/wet_sand_albedo.png" id="4_b"]
+[ext_resource type="Texture2D" path="res://assets/textures/wet_sand_normal.png" id="5_bn"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_1"]
+frequency = 0.02
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_1"]
+width = 256
+height = 256
+seamless = true
+noise = SubResource("FastNoiseLite_1")
+
+[resource]
+resource_name = "ground_shore"
+shader = ExtResource("1_shader")
+shader_parameter/albedo_a = ExtResource("2_a")
+shader_parameter/normal_a = ExtResource("3_an")
+shader_parameter/tint_a = Color(1, 1, 1, 1)
+shader_parameter/roughness_a = 0.95
+shader_parameter/uv_scale_a = 0.22
+shader_parameter/albedo_b = ExtResource("4_b")
+shader_parameter/normal_b = ExtResource("5_bn")
+shader_parameter/tint_b = Color(1, 1, 1, 1)
+shader_parameter/roughness_b = 0.35
+shader_parameter/uv_scale_b = 0.22
+shader_parameter/normal_strength = 1.0
+shader_parameter/mask_mode = 0
+shader_parameter/origin = Vector2(0, 0)
+shader_parameter/direction = Vector2(0, -1)
+shader_parameter/blend_start = 14.0
+shader_parameter/blend_width = 5.0
+shader_parameter/edge_noise = SubResource("NoiseTexture2D_1")
+shader_parameter/noise_scale = 0.05
+shader_parameter/noise_strength = 5.0

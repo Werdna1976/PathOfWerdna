@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/props/tree_prop.gd" id="1_script"]
+
+[node name="Pine" type="Node3D"]
+script = ExtResource("1_script")
+kind = 1
+height = 6.0
+bark_tint = Color(0.6, 0.52, 0.45, 1)

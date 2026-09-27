@@ -1,0 +1,15 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/foliage_sway.gdshader" id="1_shader"]
+
+[resource]
+resource_name = "foliage"
+shader = ExtResource("1_shader")
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/roughness = 0.9
+shader_parameter/alpha_scissor = 0.4
+shader_parameter/sway_strength = 0.08
+shader_parameter/sway_speed = 1.3
+shader_parameter/sway_height = 1.5
+shader_parameter/wind_dir = Vector2(1, 0.35)
+shader_parameter/translucency = 0.25

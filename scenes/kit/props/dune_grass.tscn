@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/props/grass_prop.gd" id="1_script"]
+
+[node name="DuneGrass" type="Node3D"]
+script = ExtResource("1_script")
+collision = false
+height = 0.7
+blades = 9
+base_color = Color(0.14, 0.13, 0.08, 1)
+tip_color = Color(0.4, 0.37, 0.24, 1)

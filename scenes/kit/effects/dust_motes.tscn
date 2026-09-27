@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/kit/ambient_effect.gd" id="1_script"]
+
+[node name="DustMotes" type="GPUParticles3D"]
+script = ExtResource("1_script")
+kind = 0
+density = 12.0

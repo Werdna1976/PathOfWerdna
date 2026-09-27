@@ -9,6 +9,9 @@ const GROUP: StringName = &"area_info"
 @export var zone_name: String = ""
 ## Towns are safe: no monsters, and skills can't be used.
 @export var is_town: bool = false
+## Music and ambience ids for the Audio autoload. Empty = use the zone's Biome.
+@export var music_id: StringName = &""
+@export var ambience_id: StringName = &""
 
 
 func _ready() -> void:
