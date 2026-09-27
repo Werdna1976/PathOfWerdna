@@ -122,8 +122,9 @@ func _on_label_input(event: InputEvent, ground: GroundItem) -> void:
 	get_viewport().set_input_as_handled()
 
 
-func _on_label_exited(ground: GroundItem) -> void:
-	if _hovered == ground:
+# Untyped: the ground item may already be freed (picked up) when the mouse leaves.
+func _on_label_exited(ground: Variant) -> void:
+	if not is_instance_valid(_hovered) or _hovered == ground:
 		_hovered = null
 		_tooltip.visible = false
 
