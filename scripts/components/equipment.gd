@@ -23,6 +23,8 @@ const STARTING_KIT: Array[Dictionary] = [
 	{"base": &"plate_vest", "sockets": 3, "gems": [&"leap_slam"]},
 ]
 const STARTING_BAG: Array[StringName] = [&"added_fire", &"melee_splash", &"faster_attacks", &"life_leech", &"brutality"]
+## Orbs to try the town vendors with: base id -> count.
+const STARTING_CURRENCY: Dictionary = {&"orb_transmutation": 4, &"orb_alteration": 2}
 
 @export var give_starting_kit: bool = true
 ## Where the starting support gems go.
@@ -45,6 +47,8 @@ func _ready() -> void:
 	if inventory != null:
 		for id: StringName in STARTING_BAG:
 			inventory.try_add(ItemDB.make_gem(id))
+		for id: StringName in STARTING_CURRENCY:
+			Shop.give(inventory, id, STARTING_CURRENCY[id])
 
 
 func get_item(slot: StringName) -> Item:

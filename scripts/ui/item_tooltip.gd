@@ -26,6 +26,7 @@ func _init() -> void:
 var _shown_item: Item
 var _shown_detailed: bool = false
 var _shown_skill_key: String = ""
+var _shown_footer: String = ""
 
 
 ## Shows a skill (from the skill bar) with its damage estimate.
@@ -48,10 +49,12 @@ func show_skill(skill: SkillInstance, estimate: Dictionary) -> void:
 
 
 ## `skill_estimate` is {skill, estimate} for an active gem socketed in equipped gear.
-func show_item(item: Item, detailed: bool = false, skill_estimate: Dictionary = {}) -> void:
+## `footer` is an extra line at the bottom (e.g. a vendor price).
+func show_item(item: Item, detailed: bool = false, skill_estimate: Dictionary = {}, footer: String = "") -> void:
 	# Callers may call this every frame; only rebuild when something changed.
-	if visible and item == _shown_item and detailed == _shown_detailed:
+	if visible and item == _shown_item and detailed == _shown_detailed and footer == _shown_footer:
 		return
+	_shown_footer = footer
 	_shown_item = item
 	_shown_detailed = detailed
 	_shown_skill_key = ""
@@ -176,6 +179,9 @@ func _local_color(item: Item, stat_a: StringName, stat_b: StringName) -> Color:
 
 
 func _finish() -> void:
+	if _shown_footer != "" and _shown_item != null:
+		_separator()
+		_add(_shown_footer, Item.CURRENCY_COLOR, 14)
 	reset_size()
 	visible = true
 

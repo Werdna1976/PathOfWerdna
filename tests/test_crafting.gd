@@ -127,6 +127,7 @@ func _test_screen_and_estimates() -> void:
 	var equipment: Equipment = player.get_node("Equipment") as Equipment
 	var stats: CharacterStats = player.get_node("CharacterStats") as CharacterStats
 
+	inventory.entries.clear()  # drop the starting orbs so this stack stays separate
 	var orbs: Item = _item(Item.Rarity.NORMAL, &"orb_transmutation")
 	orbs.stack = 3
 	inventory.try_add(orbs)
@@ -151,7 +152,11 @@ func _test_screen_and_estimates() -> void:
 	_check("the last orb in a stack leaves the bag", not inventory.items().has(orbs) and screen.applying == null)
 	print("  info: crafted boots: %s" % [boots.affix_lines()])
 	var granted: Dictionary = boots.global_stats()
-	_check("crafting equipped gear refreshes stats", not granted.is_empty() and granted.keys().all(
+	# Local mods (e.g. armour) show up in armour; global ones in the gear totals.
+	var armour: float = 0.0
+	for item: Item in equipment.equipped():
+		armour += item.local_defence(&"armour")
+	_check("crafting equipped gear refreshes stats", stats.stat(&"armour") == roundf(armour) and granted.keys().all(
 		func(k: StringName) -> bool: return stats.gear.get(k, 0) == granted[k]))
 
 	# Damage estimates.

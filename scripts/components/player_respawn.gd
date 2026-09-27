@@ -25,6 +25,11 @@ func _ready() -> void:
 	health.died.connect(_on_died)
 
 
+## Where the player gets back up: the entry of the zone they're in.
+func set_spawn(position: Vector3) -> void:
+	_spawn_position = position
+
+
 func _on_died() -> void:
 	melee.cancel()
 	combat.clear()

@@ -9,6 +9,9 @@ signal move_ordered
 @export var movement: NavMovement
 @export_flags_3d_physics var ground_mask: int = 1
 @export var marker_scene: PackedScene
+## Optional. Clicking an NPC walks to it and interacts instead of just moving.
+@export var npc_interaction: NpcInteraction
+@export_flags_3d_physics var npc_mask: int = 32
 
 ## True only while a press that reached the world (not the HUD) is held.
 var _holding: bool = false
@@ -21,8 +24,17 @@ func is_holding() -> bool:
 func _unhandled_input(event: InputEvent) -> void:
 	if not event.is_action_pressed("move"):
 		return
+	if npc_interaction != null:
+		var npc: Dictionary = CursorRay.cast(get_viewport(), npc_mask)
+		if not npc.is_empty():
+			move_ordered.emit()
+			npc_interaction.request(npc["collider"] as Node3D)
+			get_viewport().set_input_as_handled()
+			return
 	_holding = true
 	move_ordered.emit()
+	if npc_interaction != null:
+		npc_interaction.cancel()
 	var point: Vector3 = CursorRay.ground_point(get_viewport(), ground_mask)
 	if point.is_finite():
 		movement.set_target(point)

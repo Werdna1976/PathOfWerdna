@@ -302,7 +302,8 @@ func drop_held() -> void:
 func _drop(item: Item) -> void:
 	var player: Node3D = inventory.get_parent() as Node3D
 	var angle: float = randf() * TAU
-	GroundItem.spawn(item, player.get_parent(), player.global_position + Vector3(cos(angle), 0.0, sin(angle)) * 0.8)
+	var parent: Node = Game.item_parent(get_tree(), player.get_parent())
+	GroundItem.spawn(item, parent, player.global_position + Vector3(cos(angle), 0.0, sin(angle)) * 0.8)
 
 
 func _items_under(item: Item, pos: Vector2i) -> Array[Item]:

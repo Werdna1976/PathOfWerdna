@@ -231,8 +231,9 @@ res://
    - **4a, items and drops:** item levels, bases, affix rolling, drops, ground labels and pickup. *(Done.)*
    - **4b, inventory and equipment:** the inventory screen, equipping the 10 slots, and gear stats applying to Werdna. *(Done.)*
    - **4c, sockets and gems:** socketing gems, support gems, and the skill bar drawing from socketed gems. *(Done. Gem XP moved to Milestone 5.)*
-5. **Progression:** XP, levels, gem XP and levels, attributes, and the warrior region of the skill tree.
-6. **Content:** more enemies, a boss, a town hub and procedural map pieces.
+5. **Town and zones (done early):** Werdna's Camp with a gear vendor and a gem vendor, and zone travel to the Goblin Shore. The stash and the portal skill come later.
+6. **Progression:** XP, levels, gem XP and levels, attributes, and the warrior region of the skill tree.
+7. **Content:** more enemies, a boss, and procedural map pieces.
 
 ## Future polish
 - **Item art:** inventory icons and distinct ground models per item type. Items are coloured boxes with names for now.

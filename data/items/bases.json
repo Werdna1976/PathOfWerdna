@@ -65,6 +65,8 @@
 		{ "id": "gilded_charm", "name": "Gilded Charm", "slot": "charm", "tags": ["charm", "gilded_charm"], "size": [1, 1], "drop_level": 1 },
 		{ "id": "swift_charm", "name": "Swift Charm", "slot": "charm", "tags": ["charm", "swift_charm"], "size": [1, 1], "drop_level": 1 },
 
+		{ "id": "transmutation_shard", "name": "Transmutation Shard", "slot": "currency", "tags": ["currency"], "size": [1, 1], "drop_level": 999, "stack": 20, "drop_weight": 0,
+			"description": "5 shards combine into an Orb of Transmutation" },
 		{ "id": "orb_transmutation", "name": "Orb of Transmutation", "slot": "currency", "tags": ["currency"], "size": [1, 1], "drop_level": 1, "stack": 40, "drop_weight": 400,
 			"description": "Upgrades a normal item to a magic item" },
 		{ "id": "orb_augmentation", "name": "Orb of Augmentation", "slot": "currency", "tags": ["currency"], "size": [1, 1], "drop_level": 1, "stack": 30, "drop_weight": 250,

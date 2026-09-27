@@ -5,10 +5,20 @@ extends Node
 const GROUP: StringName = &"area_info"
 
 @export_range(1, 100) var area_level: int = 1
+## Shown when the player enters.
+@export var zone_name: String = ""
+## Towns are safe: no monsters, and skills can't be used.
+@export var is_town: bool = false
 
 
 func _ready() -> void:
 	add_to_group(GROUP)
+
+
+## True when the current area is a town.
+static func in_town(tree: SceneTree) -> bool:
+	var info: AreaInfo = tree.get_first_node_in_group(GROUP) as AreaInfo
+	return info != null and info.is_town
 
 
 ## The current area's level, or 1 if the level has no AreaInfo.

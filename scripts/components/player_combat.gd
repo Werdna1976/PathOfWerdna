@@ -156,6 +156,9 @@ func _on_swing_finished() -> void:
 
 ## Starts the skill if it's off cooldown and affordable. Returns whether it started.
 func _use(gem: SkillInstance, direction: Vector3, leap_to: Vector3 = Vector3.INF) -> bool:
+	if AreaInfo.in_town(get_tree()):
+		skill_bar.report_failure("You can't use skills in town")
+		return false
 	var problem: String = skill_bar.check(gem)
 	if problem != "":
 		skill_bar.report_failure(problem)

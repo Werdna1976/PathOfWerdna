@@ -213,6 +213,39 @@ Keys are bound by physical location, so they stay in the same place on non-QWERT
   tooltips, on tooltips of active gems socketed in gear, and as a Skills section at the top of
   the character sheet.
 
+## Town, vendors and zones
+
+- **The game runs from `scenes/main.tscn`** (`Game`). It holds the player, camera and UI, and
+  loads one zone at a time underneath them.
+  - Each zone is its own scene with navigation, lighting, an `AreaInfo` (name, level, whether it's
+    a town), entry markers under `Entries/`, and `ZoneExit` doorways under `Exits/`.
+  - Walking into a doorway unloads the zone and loads the next one at the matching entry.
+  - Items dropped on the ground stay in the zone they were dropped in.
+  - Dying respawns you at the entrance of the current zone.
+- **Werdna's Camp** (`scenes/levels/town.tscn`) is safe: there are no monsters, and skills can't
+  be used there. The gate on the east side leads to the Shore.
+  - **Greta the Smith** sells 12 normal and magic items at item level 3 for 1 Transmutation or 1
+    Alteration Orb each. Her stock rerolls every time the town loads, so it refreshes after each
+    trip.
+  - **Ilsa the Gemcutter** always has every gem:
+    - Actives cost 1 Transmutation Orb; Leap Slam costs 2.
+    - Supports cost 1 Alteration Orb; Melee Splash and Brutality cost 2.
+  - Click a vendor to walk over and open the shop; the inventory opens beside it. Click stock to
+    buy. Pick up an inventory item and click the Sell box to sell it; socketed gems come back to
+    your bag.
+  - **Sell prices:**
+    - Normal items and gems: 1 Transmutation Shard.
+    - Magic items: 2 shards.
+    - Rare items: 1 Alteration Orb.
+    - Legendary items: 1 Chaos Orb.
+  - 5 shards combine into an Orb of Transmutation automatically.
+- **The Goblin Shore** (`scenes/levels/shore.tscn`) is area level 3: a sandy beach by the sea,
+  with rocks, a wreck and 10 goblins that respawn after 45 s. The gate on the west side leads
+  back to camp.
+- **Starting orbs:** Werdna starts with 4 Transmutation and 2 Alteration Orbs to try the shops.
+- **The zone layouts are placeholder blockouts,** editable in the Godot editor like any scene.
+  `scenes/levels/test_arena.tscn` stays as the standalone arena the older tests use.
+
 ### Why a perspective camera
 
 The camera uses **perspective with a narrow 35° FOV** instead of orthographic because:
@@ -293,7 +326,17 @@ Run the crafting test:
 C:/GoDot/Godot_v4.7.2-stable_win64.exe --headless --path C:/GoDot/Projects/Godot-Opus-ARPG -s res://tests/test_crafting.gd
 ```
 
-It covers every orb's rules and results, keeping mods on upgrades, item level limits on
+Run the town test (it uses the real game scene):
+
+```bash
+C:/GoDot/Godot_v4.7.2-stable_win64.exe --headless --path C:/GoDot/Projects/Godot-Opus-ARPG -s res://tests/test_town.gd
+```
+
+It covers town safety, buying and selling at both vendors, prices, shards combining into orbs,
+the shop closing when you walk away, travelling both ways, zone-local drops, respawning at the
+zone entry, and gear stock refreshing after a trip.
+
+The crafting test covers every orb's rules and results, keeping mods on upgrades, item level limits on
 rerolls, Jeweller's ejecting gems, the inventory crafting flow with Shift, and the damage and
 DPS estimates.
 

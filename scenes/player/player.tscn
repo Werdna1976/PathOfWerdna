@@ -20,6 +20,7 @@
 [ext_resource type="Script" path="res://scripts/components/equipment.gd" id="20_equip"]
 [ext_resource type="Script" path="res://scripts/components/defenses.gd" id="21_def"]
 [ext_resource type="Script" path="res://scripts/components/character_stats.gd" id="22_stats"]
+[ext_resource type="Script" path="res://scripts/components/npc_interaction.gd" id="23_npc"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.4
@@ -124,9 +125,10 @@ potions = Array[Resource]([ExtResource("16_hp"), ExtResource("17_mp")])
 health = NodePath("../Health")
 mana = NodePath("../Mana")
 
-[node name="ClickMoveInput" type="Node" parent="." node_paths=PackedStringArray("movement")]
+[node name="ClickMoveInput" type="Node" parent="." node_paths=PackedStringArray("movement", "npc_interaction")]
 script = ExtResource("2_input")
 movement = NodePath("../NavMovement")
+npc_interaction = NodePath("../NpcInteraction")
 marker_scene = ExtResource("3_marker")
 
 [node name="PlayerCombat" type="Node" parent="." node_paths=PackedStringArray("movement", "melee", "health", "skill_bar", "click_move")]
@@ -185,3 +187,8 @@ melee = NodePath("../Melee")
 movement = NodePath("../NavMovement")
 potions = NodePath("../PotionBelt")
 skill_bar = NodePath("../SkillBar")
+
+[node name="NpcInteraction" type="Node" parent="." node_paths=PackedStringArray("movement", "health")]
+script = ExtResource("23_npc")
+movement = NodePath("../NavMovement")
+health = NodePath("../Health")

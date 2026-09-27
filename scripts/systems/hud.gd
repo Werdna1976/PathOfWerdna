@@ -29,6 +29,10 @@ var _es_fill: ColorRect
 
 var inventory_screen: InventoryScreen
 var character_sheet: CharacterSheet
+var vendor_screen: VendorScreen
+var _banner: Label
+var _banner_tween: Tween
+var _player: Node3D
 var _melee: MeleeAttack
 var _skill_tooltip: ItemTooltip
 var _hovered_slot: int = -1
@@ -52,6 +56,13 @@ func _ready() -> void:
 	_death_label.grow_vertical = Control.GROW_DIRECTION_BOTH
 	_death_label.visible = false
 	add_child(_death_label)
+
+	_banner = _make_label(40, Color(0.95, 0.85, 0.55))
+	_banner.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	_banner.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_banner.position.y = 80.0
+	_banner.modulate.a = 0.0
+	add_child(_banner)
 
 	_bind_player.call_deferred()
 
@@ -95,6 +106,10 @@ func _bind_player() -> void:
 	add_child(inventory_screen)
 	inventory_screen.bind(player)
 	inventory_screen.message.connect(_show_message)
+	vendor_screen = VendorScreen.new()
+	add_child(vendor_screen)
+	vendor_screen.message.connect(_show_message)
+	_player = player as Node3D
 
 	_melee = player.get_node("Melee") as MeleeAttack
 	_skill_tooltip = ItemTooltip.new()
@@ -139,6 +154,33 @@ func _on_energy_shield_changed(current: float, maximum: float) -> void:
 	_es_frame.visible = maximum > 0.0
 	if maximum > 0.0:
 		_es_fill.size.x = BAR_SIZE.x * clampf(current / maximum, 0.0, 1.0)
+
+
+## Big zone name at the top of the screen that fades out.
+func show_banner(text: String) -> void:
+	_banner.text = text
+	if _banner_tween != null:
+		_banner_tween.kill()
+	_banner.modulate.a = 1.0
+	_banner_tween = create_tween()
+	_banner_tween.tween_interval(1.8)
+	_banner_tween.tween_property(_banner, "modulate:a", 0.0, 1.0)
+
+
+## Opens a vendor's shop with the inventory beside it.
+func open_vendor(vendor: Vendor) -> void:
+	if not inventory_screen.visible:
+		inventory_screen.toggle()
+	vendor_screen.open(vendor, _player, inventory_screen)
+
+
+func close_panels() -> void:
+	if inventory_screen == null:
+		return
+	if inventory_screen.visible:
+		inventory_screen.close()
+	vendor_screen.close()
+	character_sheet.visible = false
 
 
 func _on_slot_exited(slot: int) -> void:
