@@ -234,6 +234,9 @@ res://
 5. **Progression:** XP, levels, attributes and the warrior region of the skill tree.
 6. **Content:** more enemies, a boss, a town hub and procedural map pieces.
 
+## Future polish
+- **Item art:** inventory icons and distinct ground models per item type. Items are coloured boxes with names for now.
+
 ## Open questions
 1. **Orb economy:** exact drop rates, vendor prices, and how shards work. These will be tuned during the Loot milestone.
 2. **Bleed and stun rules:** how bleed damage and stun thresholds are calculated. This is decided in the Fight and Skills milestones.

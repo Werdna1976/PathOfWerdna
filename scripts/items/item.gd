@@ -132,12 +132,16 @@ func local_defence(kind: StringName) -> int:
 	return int(roundf(flat * (1.0 + stat_total(&"local_defences_percent") / 100.0)))
 
 
-## Affix lines, prefixes first (as PoE shows them).
+## Affix lines, prefixes first (as PoE shows them). Local mods, which only
+## change this item's own damage or defences, are marked "(local)".
 func affix_lines() -> Array[String]:
 	var lines: Array[String] = []
 	for kind: AffixDef.Kind in [AffixDef.Kind.PREFIX, AffixDef.Kind.SUFFIX]:
 		for roll: Dictionary in affixes:
 			var def: AffixDef = affix_def(roll)
 			if def.kind == kind:
-				lines.append(AffixDef.format(def.text, roll["value"]))
+				var line: String = AffixDef.format(def.text, roll["value"])
+				if LOCAL_STATS.has(def.stat):
+					line += " (local)"
+				lines.append(line)
 	return lines

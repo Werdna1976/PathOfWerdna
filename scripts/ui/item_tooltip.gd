@@ -42,6 +42,7 @@ func show_item(item: Item, detailed: bool = false) -> void:
 	if item.rarity >= Item.Rarity.RARE and not item.base.is_currency():
 		_add(item.base.name, item.color(), 18, true)
 	_separator()
+	_add(item.base.type_name(), LABEL_COLOR)
 
 	if item.base.is_currency():
 		_add("Stack Size: %d / %d" % [item.stack, item.base.max_stack], VALUE_COLOR)

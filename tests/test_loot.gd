@@ -209,6 +209,13 @@ func _test_names() -> void:
 	_check("rares get a two-word name", rare.display_name().split(" ").size() == 2)
 	var ring: Item = _gen.generate(ItemDB.base(&"iron_ring"), 1, Item.Rarity.NORMAL)
 	_check("implicit text formats 'Adds X to Y'", ring.implicit_text().begins_with("Adds ") and ring.implicit_text().contains(" to "))
+	_check("item types name hands and weapon class", ItemDB.base(&"rusted_hatchet").type_name() == "One Handed Axe"
+		and ItemDB.base(&"driftwood_maul").type_name() == "Two Handed Mace" and ItemDB.base(&"plate_vest").type_name() == "Body Armour"
+		and ItemDB.base(&"goathide_buckler").type_name() == "Shield")
+	var gloves: Item = _gen.generate(ItemDB.base(&"rawhide_gloves"), 1, Item.Rarity.MAGIC)
+	gloves.affixes = [{"id": &"increased_defences", "tier": 0, "value": 18}, {"id": &"max_life", "tier": 0, "value": 12}]
+	var lines: Array[String] = gloves.affix_lines()
+	_check("local mods are marked (local); global ones aren't", lines[0].ends_with("(local)") and not lines[1].ends_with("(local)"))
 
 
 func _test_inventory() -> void:

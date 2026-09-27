@@ -44,6 +44,21 @@ static func from_dict(d: Dictionary) -> ItemBase:
 	return base
 
 
+## Item class shown under the name, e.g. "One Handed Axe" or "Body Armour".
+func type_name() -> String:
+	if is_weapon():
+		var hands: String = "Two Handed" if is_two_handed() else "One Handed"
+		for kind: String in ["axe", "sword", "mace"]:
+			if has_tag(StringName(kind)):
+				return "%s %s" % [hands, kind.capitalize()]
+		return "%s Weapon" % hands
+	return {
+		&"off_hand": "Shield", &"chest": "Body Armour", &"helm": "Helmet", &"gloves": "Gloves",
+		&"boots": "Boots", &"ring": "Ring", &"amulet": "Amulet", &"charm": "Charm",
+		&"currency": "Stackable Currency",
+	}.get(slot, "Item")
+
+
 func has_tag(tag: StringName) -> bool:
 	return tags.has(tag)
 
