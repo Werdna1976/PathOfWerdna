@@ -12,11 +12,12 @@ extends KitProp
 	set(value):
 		blades = value
 		_queue_rebuild()
-@export var base_color: Color = Color(0.08, 0.1, 0.05):
+## Vertex colours are linear: keep them small for dark, natural grass.
+@export var base_color: Color = Color(0.015, 0.022, 0.008):
 	set(value):
 		base_color = value
 		_queue_rebuild()
-@export var tip_color: Color = Color(0.3, 0.32, 0.16):
+@export var tip_color: Color = Color(0.08, 0.1, 0.035):
 	set(value):
 		tip_color = value
 		_queue_rebuild()

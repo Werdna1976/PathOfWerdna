@@ -14,6 +14,8 @@ uniform float depth_fade = 3.0;
 uniform float foam_width = 0.9;
 // How fast foam bands roll in toward the shore.
 uniform float foam_speed = 0.35;
+// Foam gives off a little light so the surf line reads at night.
+uniform float foam_glow = 0.35;
 uniform float wave_height = 0.06;
 uniform float wave_speed = 0.6;
 uniform vec2 wave_dir = vec2(0.2, 1.0);
@@ -51,7 +53,8 @@ void fragment() {
 	float water_depth = max(VERTEX.z - behind.z, 0.0);
 
 	vec4 body = mix(shallow_color, deep_color, clamp(water_depth / depth_fade, 0.0, 1.0));
-	float noise = texture(foam_noise, uv * 4.0 + d * TIME * 0.03).r;
+	float noise = texture(foam_noise, uv * 9.0 + d * TIME * 0.03).r * 0.6
+		+ texture(foam_noise, uv * 3.1 - d * TIME * 0.02).r * 0.4;
 	float edge = 1.0 - smoothstep(0.0, foam_width, water_depth);
 	float bands = 0.5 + 0.5 * sin(water_depth * 7.0 - TIME * foam_speed * 7.0);
 	float foam = smoothstep(0.45, 0.75, edge * (0.55 + 0.45 * bands) * (0.6 + noise * 0.8));
@@ -59,6 +62,7 @@ void fragment() {
 	foam = max(foam, smoothstep(0.12, 0.0, water_depth) * 0.8);
 
 	ALBEDO = mix(body.rgb, foam_color.rgb, foam);
+	EMISSION = foam_color.rgb * foam * foam_glow;
 	ALPHA = mix(body.a, foam_color.a, foam);
 	ROUGHNESS = mix(0.06, 0.85, foam);
 	SPECULAR = 0.7;

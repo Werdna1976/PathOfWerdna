@@ -69,7 +69,8 @@ func _run() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out.get_base_dir()))
 	var image: Image = root.get_texture().get_image()
 	var err: Error = image.save_png(ProjectSettings.globalize_path(out))
-	print("screenshot %s: %s" % [out, error_string(err)])
+	print("screenshot %s: %s (%d fps, %d draw calls)" % [out, error_string(err), Engine.get_frames_per_second(),
+		RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)])
 	quit(0 if err == OK else 1)
 
 

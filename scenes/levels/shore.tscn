@@ -1,32 +1,35 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/systems/runtime_nav_baker.gd" id="1_ext"]
-[ext_resource type="Script" path="res://scripts/systems/area_info.gd" id="2_ext"]
-[ext_resource type="Script" path="res://scripts/systems/zone_exit.gd" id="3_ext"]
-[ext_resource type="Script" path="res://scripts/systems/enemy_spawner.gd" id="4_ext"]
-[ext_resource type="PackedScene" path="res://scenes/enemies/goblin.tscn" id="5_ext"]
+[ext_resource type="Script" path="res://scripts/kit/zone.gd" id="1_zone"]
+[ext_resource type="Resource" path="res://data/biomes/shore.tres" id="2_biome"]
+[ext_resource type="Script" path="res://scripts/systems/area_info.gd" id="3_area"]
+[ext_resource type="Script" path="res://scripts/systems/runtime_nav_baker.gd" id="4_nav"]
+[ext_resource type="Script" path="res://scripts/systems/zone_exit.gd" id="5_exit"]
+[ext_resource type="Script" path="res://scripts/systems/enemy_spawner.gd" id="6_spawner"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/goblin.tscn" id="7_goblin"]
+[ext_resource type="Script" path="res://scripts/kit/kit_ground.gd" id="8_ground"]
+[ext_resource type="Script" path="res://scripts/kit/prop_scatter.gd" id="9_scatter"]
+[ext_resource type="Script" path="res://scripts/kit/scatter_exclusion.gd" id="10_exclusion"]
+[ext_resource type="Script" path="res://scripts/kit/scatter_entry.gd" id="11_entry"]
+[ext_resource type="PackedScene" path="res://scenes/kit/props/cliff_chunk.tscn" id="12_cliff"]
+[ext_resource type="PackedScene" path="res://scenes/kit/props/shipwreck.tscn" id="13_wreck"]
+[ext_resource type="PackedScene" path="res://scenes/kit/props/boulder.tscn" id="14_boulder"]
+[ext_resource type="PackedScene" path="res://scenes/kit/props/rock_cluster.tscn" id="15_rocks"]
+[ext_resource type="PackedScene" path="res://scenes/kit/props/tent.tscn" id="16_tent"]
+[ext_resource type="PackedScene" path="res://scenes/kit/props/campfire.tscn" id="17_campfire"]
+[ext_resource type="PackedScene" path="res://scenes/kit/props/brazier.tscn" id="18_brazier"]
+[ext_resource type="PackedScene" path="res://scenes/kit/props/palisade.tscn" id="19_palisade"]
+[ext_resource type="PackedScene" path="res://scenes/kit/props/crate.tscn" id="20_crate"]
+[ext_resource type="PackedScene" path="res://scenes/kit/props/sack.tscn" id="21_sack"]
+[ext_resource type="PackedScene" path="res://scenes/kit/props/barrel.tscn" id="22_barrel"]
+[ext_resource type="PackedScene" path="res://scenes/kit/props/torch.tscn" id="23_torch"]
+[ext_resource type="PackedScene" path="res://scenes/kit/props/driftwood.tscn" id="24_drift"]
+[ext_resource type="PackedScene" path="res://scenes/kit/props/banner.tscn" id="25_banner"]
+[ext_resource type="PackedScene" path="res://scenes/kit/water_plane.tscn" id="26_water"]
+[ext_resource type="PackedScene" path="res://scenes/kit/effects/sea_spray.tscn" id="27_spray"]
+[ext_resource type="Material" path="res://assets/materials/wet_sand.tres" id="28_wetsand"]
 
-[sub_resource type="Environment" id="Environment_1"]
-background_mode = 1
-background_color = Color(0.01, 0.014, 0.022, 1)
-ambient_light_source = 2
-ambient_light_color = Color(0.3, 0.38, 0.55, 1)
-ambient_light_energy = 0.4
-tonemap_mode = 3
-tonemap_white = 6.0
-glow_enabled = true
-glow_intensity = 0.6
-glow_bloom = 0.05
-fog_enabled = true
-fog_light_color = Color(0.03, 0.045, 0.07, 1)
-fog_density = 0.007
-fog_sky_affect = 0.0
-volumetric_fog_enabled = true
-volumetric_fog_density = 0.014
-volumetric_fog_albedo = Color(0.6, 0.7, 0.85, 1)
-volumetric_fog_length = 80.0
-
-[sub_resource type="NavigationMesh" id="NavigationMesh_2"]
+[sub_resource type="NavigationMesh" id="NavigationMesh_1"]
 geometry_parsed_geometry_type = 1
 geometry_collision_mask = 1
 cell_height = 0.1
@@ -34,434 +37,385 @@ agent_height = 2.0
 agent_max_climb = 0.3
 agent_radius = 0.5
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_3"]
-frequency = 0.04
-fractal_octaves = 4
-
-[sub_resource type="Gradient" id="Gradient_4"]
-colors = PackedColorArray(0.6, 0.6, 0.6, 1, 1, 1, 1, 1)
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_5"]
-width = 256
-height = 256
-seamless = true
-color_ramp = SubResource("Gradient_4")
-noise = SubResource("FastNoiseLite_3")
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6"]
-albedo_color = Color(0.52, 0.47, 0.37, 1)
-roughness = 1.0
-albedo_texture = SubResource("NoiseTexture2D_5")
-uv1_scale = Vector3(8, 8, 8)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7"]
-albedo_color = Color(0.12, 0.12, 0.14, 1)
-roughness = 0.9
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8"]
-albedo_color = Color(0.28, 0.28, 0.3, 1)
-roughness = 0.9
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_9"]
-albedo_color = Color(0.24, 0.17, 0.1, 1)
-roughness = 0.85
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_10"]
-transparency = 1
-albedo_color = Color(0.05, 0.12, 0.2, 0.85)
-roughness = 0.1
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_11"]
-albedo_color = Color(1, 0.62, 0.25, 1)
-roughness = 0.9
-shading_mode = 0
-
-[sub_resource type="SphereMesh" id="SphereMesh_12"]
-radius = 0.14
-height = 0.28
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_13"]
-size = Vector3(54, 1, 40)
-
-[sub_resource type="BoxMesh" id="BoxMesh_14"]
-size = Vector3(54, 1, 40)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_15"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_south"]
 size = Vector3(55, 4, 1.5)
 
-[sub_resource type="BoxMesh" id="BoxMesh_16"]
-size = Vector3(55, 4, 1.5)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_17"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_side"]
 size = Vector3(1.5, 4, 41)
 
-[sub_resource type="BoxMesh" id="BoxMesh_18"]
-size = Vector3(1.5, 4, 41)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_19"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_shoreline"]
 size = Vector3(55, 3, 1)
 
-[sub_resource type="BoxMesh" id="BoxMesh_20"]
-size = Vector3(55, 3, 1)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_21"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_gateblock"]
 size = Vector3(1, 3, 8)
 
-[sub_resource type="BoxMesh" id="BoxMesh_22"]
-size = Vector3(1, 3, 8)
+[sub_resource type="Resource" id="Entry_cliff"]
+script = ExtResource("11_entry")
+scene = ExtResource("12_cliff")
+scale_min = 0.9
+scale_max = 1.35
+tilt = 6.0
+decorative = true
+spacing = 3.2
+variants = 6
 
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_23"]
-radius = 1.6
-height = 2.2
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_24"]
-top_radius = 1.36
-bottom_radius = 1.6
-height = 2.2
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_25"]
-radius = 1.2
-height = 1.8
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_26"]
-top_radius = 1.02
-bottom_radius = 1.2
-height = 1.8
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_27"]
-radius = 2.0
-height = 2.6
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_28"]
-top_radius = 1.7
-bottom_radius = 2.0
-height = 2.6
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_29"]
-radius = 1.0
-height = 1.4
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_30"]
-top_radius = 0.85
-bottom_radius = 1.0
-height = 1.4
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_31"]
-radius = 1.4
-height = 2.0
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_32"]
-top_radius = 1.19
-bottom_radius = 1.4
-height = 2.0
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_33"]
-size = Vector3(7, 1.8, 2.5)
-
-[sub_resource type="BoxMesh" id="BoxMesh_34"]
-size = Vector3(7, 1.8, 2.5)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_35"]
-size = Vector3(0.5, 0.5, 6)
-
-[sub_resource type="BoxMesh" id="BoxMesh_36"]
-size = Vector3(0.5, 0.5, 6)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_37"]
-size = Vector3(5, 1.4, 1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_38"]
-size = Vector3(5, 1.4, 1)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_39"]
-size = Vector3(3.5, 2.2, 3)
-
-[sub_resource type="BoxMesh" id="BoxMesh_40"]
-size = Vector3(3.5, 2.2, 3)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_41"]
-size = Vector3(80, 0.2, 30)
-
-[sub_resource type="BoxMesh" id="BoxMesh_42"]
-size = Vector3(80, 0.2, 30)
+[sub_resource type="PlaneMesh" id="PlaneMesh_seabed"]
+size = Vector2(90, 30)
+subdivide_width = 18
+subdivide_depth = 6
 
 [node name="Shore" type="Node3D"]
+script = ExtResource("1_zone")
+biome = ExtResource("2_biome")
+bounds = Vector3(56, 5, 42)
 
 [node name="AreaInfo" type="Node" parent="."]
-script = ExtResource("2_ext")
+script = ExtResource("3_area")
 area_level = 3
 zone_name = "The Goblin Shore"
 is_town = false
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_1")
-
-[node name="Moonlight" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.866, -0.25, 0.433, 0, 0.866, 0.5, -0.5, -0.433, 0.75, 0, 10, 0)
-light_color = Color(0.6, 0.7, 0.95, 1)
-light_energy = 0.3
-shadow_enabled = true
-
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
-navigation_mesh = SubResource("NavigationMesh_2")
-script = ExtResource("1_ext")
+navigation_mesh = SubResource("NavigationMesh_1")
+script = ExtResource("4_nav")
 
-[node name="Floor" type="StaticBody3D" parent="NavigationRegion3D"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, 0, -0.5, 0)
+[node name="Ground" type="StaticBody3D" parent="NavigationRegion3D"]
+position = Vector3(0, 0, 3)
+script = ExtResource("8_ground")
+size = Vector2(76, 44)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Floor"]
-shape = SubResource("BoxShape3D_13")
+[node name="Bounds" type="Node3D" parent="NavigationRegion3D"]
 
-[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/Floor"]
-mesh = SubResource("BoxMesh_14")
-material_override = SubResource("StandardMaterial3D_6")
+[node name="CliffSouth" type="StaticBody3D" parent="NavigationRegion3D/Bounds"]
+position = Vector3(0, 2, 20.5)
 
-[node name="CliffSouth" type="StaticBody3D" parent="NavigationRegion3D"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, 0, 2, 20.5)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Bounds/CliffSouth"]
+shape = SubResource("BoxShape3D_south")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/CliffSouth"]
-shape = SubResource("BoxShape3D_15")
+[node name="CliffWest" type="StaticBody3D" parent="NavigationRegion3D/Bounds"]
+position = Vector3(-27.5, 2, 0)
 
-[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/CliffSouth"]
-mesh = SubResource("BoxMesh_16")
-material_override = SubResource("StandardMaterial3D_7")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Bounds/CliffWest"]
+shape = SubResource("BoxShape3D_side")
 
-[node name="CliffWest" type="StaticBody3D" parent="NavigationRegion3D"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, -27.5, 2, 0)
+[node name="CliffEast" type="StaticBody3D" parent="NavigationRegion3D/Bounds"]
+position = Vector3(27.5, 2, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/CliffWest"]
-shape = SubResource("BoxShape3D_17")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Bounds/CliffEast"]
+shape = SubResource("BoxShape3D_side")
 
-[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/CliffWest"]
-mesh = SubResource("BoxMesh_18")
-material_override = SubResource("StandardMaterial3D_7")
+[node name="Shoreline" type="StaticBody3D" parent="NavigationRegion3D/Bounds"]
+position = Vector3(0, 1.5, -20.5)
 
-[node name="CliffEast" type="StaticBody3D" parent="NavigationRegion3D"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, 27.5, 2, 0)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Bounds/Shoreline"]
+shape = SubResource("BoxShape3D_shoreline")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/CliffEast"]
-shape = SubResource("BoxShape3D_17")
+[node name="GateBlock" type="StaticBody3D" parent="NavigationRegion3D/Bounds"]
+position = Vector3(-30, 1.5, 12)
 
-[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/CliffEast"]
-mesh = SubResource("BoxMesh_18")
-material_override = SubResource("StandardMaterial3D_7")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Bounds/GateBlock"]
+shape = SubResource("BoxShape3D_gateblock")
 
-[node name="Shoreline" type="StaticBody3D" parent="NavigationRegion3D"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, 0, 1.5, -20.5)
+[node name="Landmarks" type="Node3D" parent="NavigationRegion3D"]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Shoreline"]
-shape = SubResource("BoxShape3D_19")
+[node name="Wreck" parent="NavigationRegion3D/Landmarks" instance=ExtResource("13_wreck")]
+position = Vector3(2, 0, -14)
+rotation_degrees = Vector3(0, 20, 0)
 
-[node name="GateBlock" type="StaticBody3D" parent="NavigationRegion3D"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, -30, 1.5, 12)
+[node name="RockA" parent="NavigationRegion3D/Landmarks" instance=ExtResource("15_rocks")]
+position = Vector3(-12, 0, 2)
+size = 1.8
+tint = Color(0.8, 0.8, 0.86, 1)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/GateBlock"]
-shape = SubResource("BoxShape3D_21")
+[node name="RockB" parent="NavigationRegion3D/Landmarks" instance=ExtResource("14_boulder")]
+position = Vector3(-4, 0, -8)
+variant = 1
+size = 1.3
+tint = Color(0.8, 0.8, 0.86, 1)
 
-[node name="RockA" type="StaticBody3D" parent="NavigationRegion3D"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, -12, 1.1, 2)
+[node name="RockC" parent="NavigationRegion3D/Landmarks" instance=ExtResource("15_rocks")]
+position = Vector3(8, 0, 6)
+variant = 3
+size = 2.1
+tint = Color(0.8, 0.8, 0.86, 1)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/RockA"]
-shape = SubResource("CylinderShape3D_23")
+[node name="RockD" parent="NavigationRegion3D/Landmarks" instance=ExtResource("14_boulder")]
+position = Vector3(16, 0, -6)
+variant = 2
+tint = Color(0.8, 0.8, 0.86, 1)
 
-[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/RockA"]
-mesh = SubResource("CylinderMesh_24")
-material_override = SubResource("StandardMaterial3D_8")
+[node name="RockE" parent="NavigationRegion3D/Landmarks" instance=ExtResource("15_rocks")]
+position = Vector3(-18, 0, -10)
+variant = 5
+size = 1.5
+tint = Color(0.75, 0.76, 0.82, 1)
 
-[node name="RockB" type="StaticBody3D" parent="NavigationRegion3D"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, -4, 0.9, -8)
+[node name="GoblinCamp" type="Node3D" parent="NavigationRegion3D"]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/RockB"]
-shape = SubResource("CylinderShape3D_25")
+[node name="CampTent" parent="NavigationRegion3D/GoblinCamp" instance=ExtResource("16_tent")]
+position = Vector3(19.5, 0, 1.5)
+rotation_degrees = Vector3(0, -80, 0)
+variant = 3
+size = Vector3(3, 2.1, 3.4)
+canvas_tint = Color(0.28, 0.22, 0.15, 1)
 
-[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/RockB"]
-mesh = SubResource("CylinderMesh_26")
-material_override = SubResource("StandardMaterial3D_8")
+[node name="Campfire" parent="NavigationRegion3D/GoblinCamp" instance=ExtResource("17_campfire")]
+position = Vector3(16.5, 0, 4.2)
+variant = 2
+light_energy = 4.5
+light_range = 12.0
 
-[node name="RockC" type="StaticBody3D" parent="NavigationRegion3D"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, 8, 1.3, 6)
+[node name="Barricade" parent="NavigationRegion3D/GoblinCamp" instance=ExtResource("19_palisade")]
+position = Vector3(14, 0, 10)
+rotation_degrees = Vector3(0, 157, 0)
+variant = 2
+length = 5.0
+height = 1.6
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/RockC"]
-shape = SubResource("CylinderShape3D_27")
+[node name="Brazier" parent="NavigationRegion3D/GoblinCamp" instance=ExtResource("18_brazier")]
+position = Vector3(23.2, 0, -0.6)
+light_energy = 3.0
+light_range = 9.0
+shadows = false
 
-[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/RockC"]
-mesh = SubResource("CylinderMesh_28")
-material_override = SubResource("StandardMaterial3D_8")
+[node name="CrateA" parent="NavigationRegion3D/GoblinCamp" instance=ExtResource("20_crate")]
+position = Vector3(22, 0, 4.5)
+rotation_degrees = Vector3(0, 20, 0)
+variant = 1
 
-[node name="RockD" type="StaticBody3D" parent="NavigationRegion3D"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, 16, 0.7, -6)
+[node name="SackA" parent="NavigationRegion3D/GoblinCamp" instance=ExtResource("21_sack")]
+position = Vector3(21.1, 0, 5.3)
+variant = 3
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/RockD"]
-shape = SubResource("CylinderShape3D_29")
+[node name="BarrelA" parent="NavigationRegion3D/GoblinCamp" instance=ExtResource("22_barrel")]
+position = Vector3(22.6, 0, 3.3)
+variant = 2
 
-[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/RockD"]
-mesh = SubResource("CylinderMesh_30")
-material_override = SubResource("StandardMaterial3D_8")
+[node name="Totem" parent="NavigationRegion3D/GoblinCamp" instance=ExtResource("25_banner")]
+position = Vector3(17.5, 0, -1.5)
+rotation_degrees = Vector3(0, -50, 0)
+variant = 3
+pole_height = 2.8
+cloth_size = Vector2(0.7, 1.2)
+cloth_color = Color(0.25, 0.08, 0.05, 1)
 
-[node name="RockE" type="StaticBody3D" parent="NavigationRegion3D"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, -18, 1.0, -10)
+[node name="Wreckage" type="Node3D" parent="NavigationRegion3D"]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/RockE"]
-shape = SubResource("CylinderShape3D_31")
+[node name="DriftA" parent="NavigationRegion3D/Wreckage" instance=ExtResource("24_drift")]
+position = Vector3(-2, 0, -17.5)
+rotation_degrees = Vector3(0, 70, 0)
+variant = 1
 
-[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/RockE"]
-mesh = SubResource("CylinderMesh_32")
-material_override = SubResource("StandardMaterial3D_8")
+[node name="DriftB" parent="NavigationRegion3D/Wreckage" instance=ExtResource("24_drift")]
+position = Vector3(7.5, 0, -17)
+rotation_degrees = Vector3(0, -30, 0)
+variant = 2
+length = 3.0
 
-[node name="WreckHull" type="StaticBody3D" parent="NavigationRegion3D"]
-transform = Transform3D(0.9394, 0, -0.3429, 0, 1, 0, 0.3429, 0, 0.9394, 2, 0.9, -14)
+[node name="CrateWashed" parent="NavigationRegion3D/Wreckage" instance=ExtResource("20_crate")]
+position = Vector3(5.6, 0, -9.8)
+rotation_degrees = Vector3(12, 40, 8)
+variant = 3
+size = 0.8
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WreckHull"]
-shape = SubResource("BoxShape3D_33")
+[node name="BarrelWashed" parent="NavigationRegion3D/Wreckage" instance=ExtResource("22_barrel")]
+position = Vector3(-1.5, 0.4, -11.6)
+rotation_degrees = Vector3(90, 30, 0)
+variant = 1
 
-[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/WreckHull"]
-mesh = SubResource("BoxMesh_34")
-material_override = SubResource("StandardMaterial3D_9")
+[node name="PropScatter" type="Node3D" parent="NavigationRegion3D"]
+script = ExtResource("9_scatter")
+source = 1
+scatter_seed = 7
+density = 0.012
+size = Vector2(50, 36)
+marker_margin = 2.5
 
-[node name="WreckMast" type="StaticBody3D" parent="NavigationRegion3D"]
-transform = Transform3D(0.4536, 0, -0.8912, 0, 1, 0, 0.8912, 0, 0.4536, 6, 0.25, -11)
+[node name="Cliffs" type="Node3D" parent="."]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WreckMast"]
-shape = SubResource("BoxShape3D_35")
+[node name="South" type="Node3D" parent="Cliffs"]
+position = Vector3(0, 0, 22.6)
+script = ExtResource("9_scatter")
+entries = Array[ExtResource("11_entry")]([SubResource("Entry_cliff")])
+scatter_seed = 3
+density = 0.3
+size = Vector2(62, 3)
+max_count = 40
+marker_margin = 0.5
 
-[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/WreckMast"]
-mesh = SubResource("BoxMesh_36")
-material_override = SubResource("StandardMaterial3D_9")
+[node name="West" type="Node3D" parent="Cliffs"]
+position = Vector3(-29.8, 0, 0)
+script = ExtResource("9_scatter")
+entries = Array[ExtResource("11_entry")]([SubResource("Entry_cliff")])
+scatter_seed = 4
+density = 0.3
+size = Vector2(3, 46)
+max_count = 30
+marker_margin = 0.5
 
-[node name="Barricade" type="StaticBody3D" parent="NavigationRegion3D"]
-transform = Transform3D(0.9211, 0, 0.3894, 0, 1, 0, -0.3894, 0, 0.9211, 14, 0.7, 10)
+[node name="East" type="Node3D" parent="Cliffs"]
+position = Vector3(29.8, 0, 0)
+script = ExtResource("9_scatter")
+entries = Array[ExtResource("11_entry")]([SubResource("Entry_cliff")])
+scatter_seed = 5
+density = 0.3
+size = Vector2(3, 46)
+max_count = 30
+marker_margin = 0.5
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Barricade"]
-shape = SubResource("BoxShape3D_37")
+[node name="Decor" type="Node3D" parent="."]
+position = Vector3(0, 0, 1.5)
+script = ExtResource("9_scatter")
+source = 2
+scatter_seed = 9
+density = 0.22
+size = Vector2(52, 35)
+max_count = 380
+marker_margin = 1.0
 
-[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/Barricade"]
-mesh = SubResource("BoxMesh_38")
-material_override = SubResource("StandardMaterial3D_9")
+[node name="Exclusions" type="Node3D" parent="."]
 
-[node name="CampTent" type="StaticBody3D" parent="NavigationRegion3D"]
-transform = Transform3D(0.9801, 0, -0.1987, 0, 1, 0, 0.1987, 0, 0.9801, 19, 1.1, 2)
+[node name="MainPath" type="Node3D" parent="Exclusions"]
+script = ExtResource("10_exclusion")
+shape = 2
+radius = 2.2
+path_points = PackedVector2Array(-27, 12, -16, 8, -6, 4, 4, 2, 14, 4, 20, 2)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/CampTent"]
-shape = SubResource("BoxShape3D_39")
+[node name="BeachPath" type="Node3D" parent="Exclusions"]
+script = ExtResource("10_exclusion")
+shape = 2
+radius = 1.8
+path_points = PackedVector2Array(-6, 4, -8, -6, -2, -12, 10, -12, 14, -4)
 
-[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/CampTent"]
-mesh = SubResource("BoxMesh_40")
-material_override = SubResource("StandardMaterial3D_9")
+[node name="GoblinCamp" type="Node3D" parent="Exclusions"]
+position = Vector3(19, 0, 2.5)
+script = ExtResource("10_exclusion")
+radius = 5.5
 
-[node name="Sea" type="MeshInstance3D" parent="."]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, 0, -0.25, -35)
-mesh = SubResource("BoxMesh_42")
-material_override = SubResource("StandardMaterial3D_10")
-cast_shadow = 0
+[node name="WreckSite" type="Node3D" parent="Exclusions"]
+position = Vector3(2, 0, -13.5)
+script = ExtResource("10_exclusion")
+radius = 5.0
 
-[node name="Torches" type="Node3D" parent="."]
+[node name="WestExit" type="Node3D" parent="Exclusions"]
+position = Vector3(-27.5, 0, 12)
+script = ExtResource("10_exclusion")
+radius = 4.5
 
-[node name="Torch1" type="OmniLight3D" parent="Torches"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, -24.5, 3.0, 8.9)
-light_color = Color(1, 0.6, 0.28, 1)
-light_energy = 3.5
-omni_range = 8.0
-shadow_enabled = true
+[node name="Clearing" type="Node3D" parent="Exclusions"]
+position = Vector3(-14, 0, 6)
+script = ExtResource("10_exclusion")
+radius = 2.5
 
-[node name="Flame" type="MeshInstance3D" parent="Torches/Torch1"]
-cast_shadow = 0
-mesh = SubResource("SphereMesh_12")
-material_override = SubResource("StandardMaterial3D_11")
+[node name="Landmarks" type="Node3D" parent="Exclusions"]
 
-[node name="Torch2" type="OmniLight3D" parent="Torches"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, -24.5, 3.0, 15.1)
-light_color = Color(1, 0.6, 0.28, 1)
-light_energy = 3.5
-omni_range = 8.0
-shadow_enabled = true
+[node name="RockA" type="Node3D" parent="Exclusions/Landmarks"]
+position = Vector3(-12, 0, 2)
+script = ExtResource("10_exclusion")
+radius = 3.0
 
-[node name="Flame" type="MeshInstance3D" parent="Torches/Torch2"]
-cast_shadow = 0
-mesh = SubResource("SphereMesh_12")
-material_override = SubResource("StandardMaterial3D_11")
+[node name="RockC" type="Node3D" parent="Exclusions/Landmarks"]
+position = Vector3(8, 0, 6)
+script = ExtResource("10_exclusion")
+radius = 3.2
 
-[node name="Torch3" type="OmniLight3D" parent="Torches"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, 17, 1.2, 4.5)
-light_color = Color(1, 0.5, 0.2, 1)
-light_energy = 4.0
-omni_range = 11.0
-shadow_enabled = true
+[node name="RockE" type="Node3D" parent="Exclusions/Landmarks"]
+position = Vector3(-18, 0, -10)
+script = ExtResource("10_exclusion")
+radius = 2.6
 
-[node name="Flame" type="MeshInstance3D" parent="Torches/Torch3"]
-cast_shadow = 0
-mesh = SubResource("SphereMesh_12")
-material_override = SubResource("StandardMaterial3D_11")
+[node name="Sea" type="Node3D" parent="."]
 
-[node name="Torch4" type="OmniLight3D" parent="Torches"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, 0, 2.0, -11)
-light_color = Color(1, 0.6, 0.28, 1)
-light_energy = 2.5
-omni_range = 9.0
-shadow_enabled = true
+[node name="Seabed" type="MeshInstance3D" parent="Sea"]
+position = Vector3(0, -2.644, -33.37)
+rotation_degrees = Vector3(-10, 0, 0)
+mesh = SubResource("PlaneMesh_seabed")
+material_override = ExtResource("28_wetsand")
 
-[node name="Flame" type="MeshInstance3D" parent="Torches/Torch4"]
-cast_shadow = 0
-mesh = SubResource("SphereMesh_12")
-material_override = SubResource("StandardMaterial3D_11")
+[node name="Water" parent="Sea" instance=ExtResource("26_water")]
+position = Vector3(0, -0.06, -40)
+scale = Vector3(1.5, 1, 1.4)
 
-[node name="Torch5" type="OmniLight3D" parent="Torches"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, -10, 2.0, 12)
-light_color = Color(1, 0.6, 0.28, 1)
+[node name="Spray" parent="Sea" instance=ExtResource("27_spray")]
+position = Vector3(0, 0.1, -19.8)
+extents = Vector3(28, 0.3, 1.2)
+density = 40.0
+
+[node name="Lights" type="Node3D" parent="."]
+
+[node name="ExitTorchN" parent="Lights" instance=ExtResource("23_torch")]
+position = Vector3(-24.5, 0, 8.9)
+light_energy = 3.2
+light_range = 8.0
+
+[node name="ExitTorchS" parent="Lights" instance=ExtResource("23_torch")]
+position = Vector3(-24.5, 0, 15.1)
+variant = 1
+light_energy = 3.2
+light_range = 8.0
+shadows = false
+
+[node name="WreckTorch" parent="Lights" instance=ExtResource("23_torch")]
+position = Vector3(-1.5, 0, -8.8)
+variant = 2
+post_height = 1.8
+light_energy = 2.2
+light_range = 8.0
+shadows = false
+
+[node name="PathTorch" parent="Lights" instance=ExtResource("23_torch")]
+position = Vector3(-8.5, 0, 11)
+variant = 3
 light_energy = 2.0
-omni_range = 8.0
-shadow_enabled = true
-
-[node name="Flame" type="MeshInstance3D" parent="Torches/Torch5"]
-cast_shadow = 0
-mesh = SubResource("SphereMesh_12")
-material_override = SubResource("StandardMaterial3D_11")
+light_range = 8.0
+shadows = false
 
 [node name="Entries" type="Node3D" parent="."]
 
 [node name="from_town" type="Marker3D" parent="Entries"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, -22, 0, 12)
+position = Vector3(-22, 0, 12)
 
 [node name="Exits" type="Node3D" parent="."]
 
 [node name="ToTown" type="Area3D" parent="Exits"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, -25.8, 0, 12)
-script = ExtResource("3_ext")
+position = Vector3(-25.8, 0, 12)
+script = ExtResource("5_exit")
 target_zone = "res://scenes/levels/town.tscn"
 target_entry = &"from_shore"
 label_text = "To Werdna's Camp"
 size = Vector3(2.2, 2.5, 5)
 
 [node name="GoblinSpawner" type="Node3D" parent="."]
-script = ExtResource("4_ext")
-enemy_scene = ExtResource("5_ext")
+script = ExtResource("6_spawner")
+enemy_scene = ExtResource("7_goblin")
 respawn_delay = 45.0
 
 [node name="Spawn1" type="Marker3D" parent="GoblinSpawner"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, -6, 0, 4)
+position = Vector3(-6, 0, 4)
 
 [node name="Spawn2" type="Marker3D" parent="GoblinSpawner"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, -2, 0, -3)
+position = Vector3(-2, 0, -3)
 
 [node name="Spawn3" type="Marker3D" parent="GoblinSpawner"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, 4, 0, 12)
+position = Vector3(4, 0, 12)
 
 [node name="Spawn4" type="Marker3D" parent="GoblinSpawner"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, 10, 0, -2)
+position = Vector3(10, 0, -2)
 
 [node name="Spawn5" type="Marker3D" parent="GoblinSpawner"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, 13, 0, -12)
+position = Vector3(13, 0, -12)
 
 [node name="Spawn6" type="Marker3D" parent="GoblinSpawner"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, 18, 0, 8)
+position = Vector3(18, 0, 8)
 
 [node name="Spawn7" type="Marker3D" parent="GoblinSpawner"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, 21, 0, -3)
+position = Vector3(21, 0, -3)
 
 [node name="Spawn8" type="Marker3D" parent="GoblinSpawner"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, 0, 0, 16)
+position = Vector3(0, 0, 16)
 
 [node name="Spawn9" type="Marker3D" parent="GoblinSpawner"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, 22, 0, 14)
+position = Vector3(22, 0, 14)
 
 [node name="Spawn10" type="Marker3D" parent="GoblinSpawner"]
-transform = Transform3D(1.0000, 0, -0.0000, 0, 1, 0, 0.0000, 0, 1.0000, -14, 0, -14)
+position = Vector3(-14, 0, -14)

@@ -4,7 +4,10 @@ extends StaticBody3D
 ## - GEAR vendors stock normal and magic items; the stock is rolled whenever
 ##   the town loads, so it refreshes each time you come back from the wilds.
 ## - GEM vendors always offer one of every gem (buying never runs them out).
-## Placeholder look: a coloured capsule with a floating name.
+## Looks: a WarriorModel dressed by `model_armour` / `model_helm`, holding
+## `held_weapon` (an axe/sword/mace kind, or empty), facing +Z toward
+## customers, with a floating name. Set `model_armour` to -1 for the old
+## coloured capsule.
 
 enum Kind { GEAR, GEMS }
 
@@ -19,6 +22,12 @@ const NPC_LAYER: int = 32
 ## Item level of gear stock.
 @export var stock_item_level: int = 3
 @export_range(0.0, 1.0) var magic_chance: float = 0.35
+## WarriorModel.Armour style for the vendor's clothes, or -1 for a capsule.
+@export var model_armour: int = WarriorModel.Armour.LEATHER
+@export var model_helm: int = WarriorModel.Armour.NONE
+## "axe", "sword" or "mace" to hold one, or empty.
+@export var held_weapon: String = ""
+@export var cape_color: Color = Color(0, 0, 0, 0)
 
 var stock: Array[Item] = []
 
@@ -68,17 +77,20 @@ func _build_body() -> void:
 	shape.position.y = 0.95
 	add_child(shape)
 
-	var mesh := MeshInstance3D.new()
-	var capsule_mesh := CapsuleMesh.new()
-	capsule_mesh.radius = 0.45
-	capsule_mesh.height = 1.9
-	mesh.mesh = capsule_mesh
-	var material := StandardMaterial3D.new()
-	material.albedo_color = body_color
-	material.roughness = 0.8
-	mesh.material_override = material
-	mesh.position.y = 0.95
-	add_child(mesh)
+	if model_armour >= 0:
+		_build_model()
+	else:
+		var mesh := MeshInstance3D.new()
+		var capsule_mesh := CapsuleMesh.new()
+		capsule_mesh.radius = 0.45
+		capsule_mesh.height = 1.9
+		mesh.mesh = capsule_mesh
+		var material := StandardMaterial3D.new()
+		material.albedo_color = body_color
+		material.roughness = 0.8
+		mesh.material_override = material
+		mesh.position.y = 0.95
+		add_child(mesh)
 
 	var label := Label3D.new()
 	label.text = vendor_name
@@ -90,3 +102,26 @@ func _build_body() -> void:
 	label.modulate = Color(0.95, 0.85, 0.55)
 	label.position.y = 2.4
 	add_child(label)
+
+
+## Same rig as the player: Visual with a WeaponPivot and a WarriorModel.
+func _build_model() -> void:
+	var visual := Node3D.new()
+	visual.name = "Visual"
+	visual.rotation_degrees.y = 180.0  # the model faces -Z; vendors face +Z
+	add_child(visual)
+	var pivot := Node3D.new()
+	pivot.name = "WeaponPivot"
+	pivot.position = Vector3(0.3, 1.42, 0)
+	pivot.rotation_degrees.y = -35.0
+	visual.add_child(pivot)
+	var model := WarriorModel.new()
+	model.name = "Body"
+	model.cape = cape_color.a > 0.0
+	model.cape_color = cape_color
+	visual.add_child(model)
+	model.set_look(model_armour as WarriorModel.Armour, model_helm as WarriorModel.Armour,
+		WarriorModel.Armour.NONE, WarriorModel.Armour.NONE)
+	if held_weapon != "":
+		model.set_held(GearModels.weapon(held_weapon, false, 0.3), null)
+		model.right_hand.rotation_degrees.x = 70.0

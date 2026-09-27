@@ -21,7 +21,7 @@ enum Kind { DEAD, PINE }
 	set(value):
 		bark_tint = value
 		_queue_rebuild()
-@export var foliage_tint: Color = Color(0.13, 0.2, 0.12):
+@export var foliage_tint: Color = Color(0.025, 0.055, 0.03):
 	set(value):
 		foliage_tint = value
 		_queue_rebuild()
@@ -98,6 +98,6 @@ func _pine_leaves() -> ArrayMesh:
 		var base_y: float = height * (0.25 + t * 0.55)
 		var r: float = height * 0.28 * (1.0 - t * 0.7) * rng.randf_range(0.9, 1.1)
 		var tip_y: float = base_y + height * 0.32
-		var c: Color = foliage_tint.lerp(foliage_tint.lightened(0.25), t).darkened(rng.randf() * 0.15)
+		var c: Color = foliage_tint * (1.0 + t * 0.8) * rng.randf_range(0.85, 1.0)
 		KitMesh.cylinder(st, Vector3(0, base_y, 0), Vector3(rng.randf_range(-0.05, 0.05), tip_y, 0), r, 0.0, 8, c, true, false, rng.randf())
 	return KitMesh.commit(st)

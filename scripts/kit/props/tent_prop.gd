@@ -8,7 +8,7 @@ extends KitProp
 	set(value):
 		size = value
 		_queue_rebuild()
-@export var canvas_tint: Color = Color(0.72, 0.62, 0.48):
+@export var canvas_tint: Color = Color(0.5, 0.4, 0.28):
 	set(value):
 		canvas_tint = value
 		_queue_rebuild()

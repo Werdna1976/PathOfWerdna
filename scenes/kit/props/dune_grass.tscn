@@ -7,5 +7,5 @@ script = ExtResource("1_script")
 collision = false
 height = 0.7
 blades = 9
-base_color = Color(0.14, 0.13, 0.08, 1)
-tip_color = Color(0.4, 0.37, 0.24, 1)
+base_color = Color(0.035, 0.03, 0.016, 1)
+tip_color = Color(0.16, 0.14, 0.075, 1)
