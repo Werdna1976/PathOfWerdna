@@ -26,7 +26,7 @@ C:/GoDot/Godot_v4.7.2-stable_win64.exe --path C:/GoDot/Projects/Godot-Opus-ARPG
 | I | Inventory: click to pick up, place, swap or equip; right-click to quick equip or unequip; click the world while holding an item to drop it | **Working** |
 | C | Character sheet | **Working** |
 | P | Passive tree | Bound, no behavior yet |
-| Alt (hold) | Show labels for normal items too; in a tooltip, show each affix's tier | **Working** |
+| Alt (hold) | In a tooltip, show each affix's tier | **Working** |
 | Left click a ground label | Walk over and pick the item up | **Working** |
 | Esc | Close panels (menu later) | Partly working |
 

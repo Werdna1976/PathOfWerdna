@@ -1,7 +1,7 @@
 class_name GroundLabels
 extends CanvasLayer
 ## Draws a clickable name label over every GroundItem, PoE style.
-## - Magic and better items and currency always show; normal items only while Alt is held.
+## - All items show a label (see HIDE_NORMAL_ITEMS for a simple filter).
 ## - Labels that would overlap are pushed upward.
 ## - Clicking a label makes the player walk over and pick the item up.
 ## - Hovering shows the item tooltip (hold Alt for affix tiers).
@@ -67,7 +67,14 @@ func _process(_delta: float) -> void:
 		_place_tooltip()
 
 
+## Every item gets a label for now. Set to true to show normal (white) items
+## only while Alt is held, as a simple loot filter.
+const HIDE_NORMAL_ITEMS: bool = false
+
+
 func _wants_label(ground: GroundItem, show_all: bool) -> bool:
+	if not HIDE_NORMAL_ITEMS:
+		return true
 	return show_all or ground.item.base.is_currency() or ground.item.rarity != Item.Rarity.NORMAL
 
 
