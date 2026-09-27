@@ -105,7 +105,7 @@ func recompute() -> void:
 	for key: StringName in [&"life_on_hit", &"bleed_chance", &"stun_duration", &"item_rarity",
 			&"item_quantity", &"life_recoup", &"culling_strike", &"cooldown_recovery",
 			&"potion_charges_on_kill", &"mana_on_kill", &"avoid_stun", &"avoid_ailments",
-			&"explode_on_kill_chance", &"onslaught_on_kill_chance"]:
+			&"explode_on_kill_chance", &"onslaught_on_kill_chance", &"life_on_kill", &"stun_threshold"]:
 		v[key] = _g(key)
 	values = v
 	_apply()
@@ -147,6 +147,7 @@ func _physics_process(delta: float) -> void:
 
 func on_enemy_killed(_enemy: Node3D) -> void:
 	mana.restore(stat(&"mana_on_kill"))
+	health.heal(stat(&"life_on_kill"))
 
 
 func _on_swing_hit(_target: Node3D, _damage: float, _critical: bool) -> void:

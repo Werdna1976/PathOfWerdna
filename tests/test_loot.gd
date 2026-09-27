@@ -63,6 +63,56 @@ func _test_data() -> void:
 			missing.append(String(b.id))
 	_check("every base can roll both prefixes and suffixes %s" % [missing], missing.is_empty())
 
+	# Base ladders: each weapon class and each armour type per slot has several
+	# tiers spread over drop levels, and base stats grow with drop level.
+	var ladders: Dictionary = {}
+	for b: ItemBase in bases:
+		if b.is_currency() or b.slot in [&"ring", &"amulet", &"charm"]:
+			continue
+		var key: String = b.type_name() if b.is_weapon() else "%s %s" % [b.slot, _defence_kind(b)]
+		if not ladders.has(key):
+			ladders[key] = []
+		ladders[key].append(b)
+	var short: Array[String] = []
+	var not_scaling: Array[String] = []
+	for key: String in ladders:
+		var ladder: Array = ladders[key]
+		ladder.sort_custom(func(a: ItemBase, b: ItemBase) -> bool: return a.drop_level < b.drop_level)
+		var top: ItemBase = ladder[-1]
+		if ladder.size() < 3 or top.drop_level < 50:
+			short.append(key)
+		if _base_power(top) <= _base_power(ladder[0]):
+			not_scaling.append(key)
+	print("  info: %d base ladders" % ladders.size())
+	_check("every weapon class and armour type has 3+ bases up to level 50+ %s" % [short], short.is_empty())
+	_check("base stats grow with drop level %s" % [not_scaling], not_scaling.is_empty())
+	var low_top: Array[String] = []
+	for a: AffixDef in affixes:
+		if a.tiers[-1]["ilvl"] < 75 or a.tiers[-1]["ilvl"] > 84:
+			low_top.append(String(a.id))
+	_check("every affix's top tier needs item level 75-84 %s" % [low_top], low_top.is_empty())
+
+	# The single-defence % mods only scale their own defence.
+	var hybrid := Item.new()
+	hybrid.base = ItemDB.base(&"scale_vest")
+	hybrid.affixes = [{"id": &"local_armour_percent", "tier": 0, "value": 50}]
+	_check("% increased Armour is local and only scales armour",
+		hybrid.local_defence(&"armour") == 18 and hybrid.local_defence(&"evasion") == 12 and hybrid.global_stats().is_empty())
+
+
+func _defence_kind(b: ItemBase) -> String:
+	var kinds: Array[String] = []
+	for tag: String in ["str_armour", "dex_armour", "int_armour"]:
+		if b.has_tag(StringName(tag)):
+			kinds.append(tag)
+	return "/".join(kinds)
+
+
+func _base_power(b: ItemBase) -> float:
+	if b.is_weapon():
+		return (b.stats["phys_min"] + b.stats["phys_max"]) * b.stats["aps"]
+	return b.stats.get("armour", 0) + b.stats.get("evasion", 0) + b.stats.get("energy_shield", 0) * 2.0
+
 
 func _test_rarity_rules() -> void:
 	var problems: Dictionary = {}
@@ -149,14 +199,14 @@ func _test_ilvl_gating() -> void:
 	var highest_low: int = 0
 	var highest_high: int = 0
 	for i: int in 800:
-		for pair: Array in [[5, "low"], [80, "high"]]:
+		for pair: Array in [[5, "low"], [84, "high"]]:
 			var item: Item = _gen.generate(ItemDB.base(&"coral_ring"), pair[0], Item.Rarity.RARE)
 			for roll: Dictionary in item.affixes:
 				if item.affix_def(roll) == max_life:
 					if pair[1] == "low": highest_low = maxi(highest_low, roll["tier"])
 					else: highest_high = maxi(highest_high, roll["tier"])
 	_check("ilvl 5 can't roll high life tiers (best tier rank %d)" % highest_low, highest_low == 0)
-	_check("ilvl 80 can roll the top life tier (best tier rank %d)" % highest_high, highest_high == max_life.tiers.size() - 1)
+	_check("ilvl 84 can roll the top life tier (best tier rank %d)" % highest_high, highest_high == max_life.tiers.size() - 1)
 	var early_bases: bool = true
 	for i: int in 400:
 		early_bases = early_bases and _gen.random_base(1).drop_level <= 1

@@ -14,6 +14,7 @@ const SECTIONS: Array = [
 		["Attacks per Second", &"attacks_per_second", "%.2f"], ["Critical Strike Chance", &"crit_chance", "%.1f%%"],
 		["Critical Strike Multiplier", &"crit_multiplier", "%d%%"], ["Accuracy Rating", &"accuracy", "%d"],
 		["Area of Effect", &"area_of_effect", "+%d%%"], ["Life Gained per Hit", &"life_on_hit", "%d"],
+		["Life Gained per Kill", &"life_on_kill", "%d"],
 		["Culling Strike", &"culling_strike", "below %d%%"],
 		["Chance to Bleed *", &"bleed_chance", "%d%%"], ["Stun Duration *", &"stun_duration", "+%d%%"]]],
 	["Defence", [
@@ -22,7 +23,7 @@ const SECTIONS: Array = [
 		["Fire Resistance", &"fire_resistance", "res"], ["Cold Resistance", &"cold_resistance", "res"],
 		["Lightning Resistance", &"lightning_resistance", "res"], ["Chaos Resistance", &"chaos_resistance", "res"],
 		["Life Regeneration", &"life_regen", "%.1f/s"], ["Mana Regeneration", &"mana_regen", "%.1f/s"],
-		["Life Recoup", &"life_recoup", "%d%%"]]],
+		["Life Recoup", &"life_recoup", "%d%%"], ["Stun Threshold *", &"stun_threshold", "+%d%%"]]],
 	["Utility", [
 		["Movement Speed", &"movement_speed_increase", "+%d%%"], ["Item Rarity", &"item_rarity", "+%d%%"],
 		["Item Quantity", &"item_quantity", "+%d%%"], ["Cooldown Recovery", &"cooldown_recovery", "+%d%%"],

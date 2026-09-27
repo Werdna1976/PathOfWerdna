@@ -115,7 +115,14 @@ func implicit_text() -> String:
 
 ## Stats that modify only this item (weapon damage, armour values) rather than the character.
 const LOCAL_STATS: Array[StringName] = [&"local_phys_percent", &"local_added_phys",
-	&"armour", &"evasion", &"energy_shield", &"local_defences_percent"]
+	&"armour", &"evasion", &"energy_shield", &"local_defences_percent",
+	&"local_armour_percent", &"local_evasion_percent", &"local_energy_shield_percent"]
+## The local "% increased" stat for each single defence, on top of "% increased Defences".
+const LOCAL_DEFENCE_PERCENT: Dictionary = {
+	&"armour": &"local_armour_percent",
+	&"evasion": &"local_evasion_percent",
+	&"energy_shield": &"local_energy_shield_percent",
+}
 
 
 ## Sum of this item's implicit and affix values for `stat`.
@@ -160,7 +167,8 @@ func local_defence(kind: StringName) -> int:
 	var flat: int = int(base.stats.get(String(kind), 0)) + stat_total(kind)
 	if flat == 0:
 		return 0
-	return int(roundf(flat * (1.0 + stat_total(&"local_defences_percent") / 100.0)))
+	var percent: int = stat_total(&"local_defences_percent") + stat_total(LOCAL_DEFENCE_PERCENT.get(kind, &""))
+	return int(roundf(flat * (1.0 + percent / 100.0)))
 
 
 ## Affix lines, prefixes first (as PoE shows them). Local mods, which only
