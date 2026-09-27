@@ -41,8 +41,13 @@ func _init(seed_value: int = -1) -> void:
 		rng.randomize()
 
 
-func roll_rarity() -> Item.Rarity:
-	return _weighted_index(RARITY_WEIGHTS) as Item.Rarity
+## `rarity_bonus` is "increased rarity of items found" in percent; it scales
+## the magic, rare and legendary weights.
+func roll_rarity(rarity_bonus: float = 0.0) -> Item.Rarity:
+	var weights: Array[float] = RARITY_WEIGHTS.duplicate()
+	for i: int in range(1, weights.size()):
+		weights[i] *= 1.0 + rarity_bonus / 100.0
+	return _weighted_index(weights) as Item.Rarity
 
 
 ## Picks a random base that can drop at `ilvl`, either equipment or currency.
@@ -57,13 +62,13 @@ func random_base(ilvl: int, currency: bool = false) -> ItemBase:
 
 
 ## Rolls a full item. Pass `rarity` to force one, or -1 to roll it.
-func generate(base: ItemBase, ilvl: int, rarity: int = -1) -> Item:
+func generate(base: ItemBase, ilvl: int, rarity: int = -1, rarity_bonus: float = 0.0) -> Item:
 	var item := Item.new()
 	item.base = base
 	item.ilvl = ilvl
 	if base.is_currency():
 		return item
-	item.rarity = (roll_rarity() if rarity < 0 else rarity) as Item.Rarity
+	item.rarity = (roll_rarity(rarity_bonus) if rarity < 0 else rarity) as Item.Rarity
 	if not base.implicit.is_empty():
 		item.implicit_value = rng.randi_range(int(base.implicit["min"]), int(base.implicit["max"]))
 	item.sockets = roll_sockets(base.max_sockets)

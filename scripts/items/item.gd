@@ -82,6 +82,56 @@ func implicit_text() -> String:
 	return AffixDef.format(base.implicit["text"], implicit_value)
 
 
+## Stats that modify only this item (weapon damage, armour values) rather than the character.
+const LOCAL_STATS: Array[StringName] = [&"local_phys_percent", &"local_added_phys",
+	&"armour", &"evasion", &"energy_shield", &"local_defences_percent"]
+
+
+## Sum of this item's implicit and affix values for `stat`.
+func stat_total(stat: StringName) -> int:
+	var total: int = 0
+	if not base.implicit.is_empty() and StringName(base.implicit["stat"]) == stat:
+		total += implicit_value
+	for roll: Dictionary in affixes:
+		if affix_def(roll).stat == stat:
+			total += int(roll["value"])
+	return total
+
+
+## Global (character) stat totals from this item: every stat except local ones.
+func global_stats() -> Dictionary:
+	var totals: Dictionary = {}
+	var add := func(stat: StringName, value: int) -> void:
+		if not LOCAL_STATS.has(stat):
+			totals[stat] = totals.get(stat, 0) + value
+	if not base.implicit.is_empty():
+		add.call(StringName(base.implicit["stat"]), implicit_value)
+	for roll: Dictionary in affixes:
+		add.call(affix_def(roll).stat, int(roll["value"]))
+	return totals
+
+
+## Weapon physical damage after local mods, as (min, max). Zero if not a weapon.
+func weapon_damage() -> Vector2:
+	if not base.stats.has("phys_min"):
+		return Vector2.ZERO
+	var added: int = stat_total(&"local_added_phys")
+	var scale: float = 1.0 + stat_total(&"local_phys_percent") / 100.0
+	return Vector2(roundf((base.stats["phys_min"] + added) * scale), roundf((base.stats["phys_max"] + added * 2) * scale))
+
+
+func attacks_per_second() -> float:
+	return base.stats.get("aps", 0.0)
+
+
+## Armour, evasion or energy shield on this item after local flat and % mods.
+func local_defence(kind: StringName) -> int:
+	var flat: int = int(base.stats.get(String(kind), 0)) + stat_total(kind)
+	if flat == 0:
+		return 0
+	return int(roundf(flat * (1.0 + stat_total(&"local_defences_percent") / 100.0)))
+
+
 ## Affix lines, prefixes first (as PoE shows them).
 func affix_lines() -> Array[String]:
 	var lines: Array[String] = []

@@ -23,10 +23,12 @@ C:/GoDot/Godot_v4.7.2-stable_win64.exe --path C:/GoDot/Projects/Godot-Opus-ARPG
 | Q W E R T | Skill slots (Q = Cleave, W = Leap Slam). Click a slot on the skill bar to change its skill | **Working** |
 | 1 / 2 | Health potion / mana potion | **Working** |
 | 3–5 | Future potions | Bound, no behavior yet |
-| I / C / P | Inventory / character / passives | Bound, no behavior yet |
+| I | Inventory: click to pick up, place, swap or equip; right-click to quick equip or unequip; click the world while holding an item to drop it | **Working** |
+| C | Character sheet | **Working** |
+| P | Passive tree | Bound, no behavior yet |
 | Alt (hold) | Show labels for normal items too; in a tooltip, show each affix's tier | **Working** |
 | Left click a ground label | Walk over and pick the item up | **Working** |
-| Esc | Menu | Bound, no behavior yet |
+| Esc | Close panels (menu later) | Partly working |
 
 Keys are bound by physical location, so they stay in the same place on non-QWERTY layouts.
 
@@ -124,6 +126,44 @@ Keys are bound by physical location, so they stay in the same place on non-QWERT
 - **Inventory** (`Inventory`) is a PoE-style 12×5 grid. Items fill column by column and
   currency stacks. The inventory screen comes in 4b.
 
+## Milestone 4b: "Inventory and equipment"
+
+- **Equipment** (`Equipment`) has 10 slots: weapon, off hand, helm, body armour, gloves, boots,
+  two rings, amulet and charm.
+  - A two-hander uses both hands. Equipping one displaces the off hand, and equipping a shield
+    displaces the two-hander.
+  - Off hands hold shields only for now; there's no dual wielding yet.
+  - Werdna starts with a Rusted Hatchet.
+- **Stats** (`CharacterStats`) add up base values, attributes and gear, then apply the results
+  to the other components:
+  - **Attributes:** STR +0.5 life and +0.2% melee physical damage per point. DEX +2 accuracy
+    and +0.2% evasion. INT +0.5 mana and +0.2% energy shield. Werdna's base attributes are
+    STR 20, DEX 14 and INT 14.
+  - **Life and mana:** 100 life and 50 mana at the start. When the maximum changes, the current
+    value keeps its percentage. Mana regenerates 4% of its maximum per second.
+  - **Weapon damage** uses local mods (% physical, added physical), plus added damage to
+    attacks from jewellery and gloves. Attack speed is weapon APS × increases; it shortens skill
+    wind-up and recovery against a 1.5 APS baseline. Unarmed damage is 2–6.
+  - **Crits:** 5% base chance, scaled by increases, with a 150% multiplier.
+  - **Other stats applied:** area of effect scales area skills' radius; movement speed, life
+    regeneration, life on hit, culling strike, potion charges on kill, mana on kill, cooldown
+    recovery, and item rarity and quantity all work.
+- **Defences** (`Defenses`) are applied in this order:
+  - **Block:** shields block the whole hit.
+  - **Evasion:** dodges physical hits, with a chance of evasion / (evasion + 250), max 75%.
+  - **Armour:** reduces physical hits by A / (A + 5 × damage), max 90%.
+  - **Resistances:** capped at 75%.
+  - **Energy shield:** absorbs damage before life and recharges after 2 s without damage.
+  - **Life recoup:** heals back a share of damage taken over 4 s.
+  - Avoided hits pop "Block" or "Evade" text. A thin light-blue bar above life shows energy
+    shield.
+- **Inventory screen** (I) is custom-drawn with the PoE paper-doll layout above the 12×5 grid.
+  - Items are coloured by rarity and show their socket count.
+  - Hovering an item shows its tooltip to the left of the panel; hold Alt to see affix tiers.
+- **Character sheet** (C) lists attributes, offence, defence and utility stats. Stats marked
+  `*` roll on gear but don't do anything in combat yet: bleed, stun, avoid stun or ailments,
+  explode on kill and Onslaught.
+
 ### Why a perspective camera
 
 The camera uses **perspective with a narrow 35° FOV** instead of orthographic because:
@@ -177,6 +217,16 @@ C:/GoDot/Godot_v4.7.2-stable_win64.exe --headless --path C:/GoDot/Projects/Godot
 The loot test covers the data tables, 3,000 random drops checked against every affix rule,
 weapon mod identity, charm-only mods, item-level gating, legendary tier bias, socket
 distribution, names, the inventory grid and stacking, and drop-and-pickup in the arena.
+
+Run the headless Milestone 4b test:
+
+```bash
+C:/GoDot/Godot_v4.7.2-stable_win64.exe --headless --path C:/GoDot/Projects/Godot-Opus-ARPG -s res://tests/test_equipment.gd
+```
+
+The equipment test covers slot rules and two-handed conflicts, life, mana and attribute
+maths, weapon damage and attack speed, armour, energy shield absorption and recharge, block and
+evasion rates, the resistance cap, charm stats, and every inventory screen action.
 
 It checks that:
 - every Input Map action exists and is bound

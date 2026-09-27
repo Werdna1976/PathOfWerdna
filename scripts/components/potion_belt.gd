@@ -14,6 +14,8 @@ const KILL_LISTENERS: StringName = &"kill_listeners"
 @export var health: Health
 @export var mana: Mana
 @export var charges_per_kill: float = 3.0
+## Extra charges per kill from gear (charm mods).
+var bonus_charges_per_kill: float = 0.0
 
 var charges: Array[float] = []
 ## Seconds of effect left per potion.
@@ -55,7 +57,7 @@ func refill() -> void:
 
 func on_enemy_killed(_enemy: Node3D) -> void:
 	for i: int in potions.size():
-		charges[i] = minf(charges[i] + charges_per_kill, potions[i].max_charges)
+		charges[i] = minf(charges[i] + charges_per_kill + bonus_charges_per_kill, potions[i].max_charges)
 	changed.emit()
 
 

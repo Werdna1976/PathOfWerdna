@@ -35,6 +35,14 @@ func restore(amount: float) -> void:
 	changed.emit(current, max_mana)
 
 
+## Changes maximum mana, keeping the same fraction of mana filled.
+func set_max_mana(value: float) -> void:
+	var fraction: float = current / max_mana if max_mana > 0.0 else 1.0
+	max_mana = value
+	current = roundf(value * fraction)
+	changed.emit(current, max_mana)
+
+
 func restore_full() -> void:
 	current = max_mana
 	changed.emit(current, max_mana)

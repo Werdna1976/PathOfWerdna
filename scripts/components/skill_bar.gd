@@ -16,6 +16,9 @@ const SLOT_KEYS: Array[String] = ["RMB", "Q", "W", "E", "R", "T"]
 ## Initial loadout by slot. Missing entries are empty.
 @export var slots: Array[SkillGem] = []
 
+## Cooldowns tick this much faster (1.25 = 25% increased cooldown recovery).
+var cooldown_rate: float = 1.0
+
 ## Seconds left per gem id.
 var _cooldowns: Dictionary = {}
 
@@ -67,7 +70,7 @@ func report_failure(reason: String) -> void:
 
 func _physics_process(delta: float) -> void:
 	for id: StringName in _cooldowns.keys():
-		var left: float = _cooldowns[id] - delta
+		var left: float = _cooldowns[id] - delta * cooldown_rate
 		if left <= 0.0:
 			_cooldowns.erase(id)
 		else:

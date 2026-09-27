@@ -19,6 +19,9 @@
 [ext_resource type="Resource" path="res://data/potions/mana_potion.tres" id="17_mp"]
 [ext_resource type="Script" path="res://scripts/components/inventory.gd" id="18_inv"]
 [ext_resource type="Script" path="res://scripts/components/item_pickup.gd" id="19_pickup"]
+[ext_resource type="Script" path="res://scripts/components/equipment.gd" id="20_equip"]
+[ext_resource type="Script" path="res://scripts/components/defenses.gd" id="21_def"]
+[ext_resource type="Script" path="res://scripts/components/character_stats.gd" id="22_stats"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.4
@@ -86,9 +89,14 @@ path_desired_distance = 0.1
 target_desired_distance = 0.15
 path_height_offset = 0.2
 
-[node name="Health" type="Node" parent="."]
+[node name="Health" type="Node" parent="." node_paths=PackedStringArray("defenses")]
 script = ExtResource("4_health")
 max_health = 100.0
+defenses = NodePath("../Defenses")
+
+[node name="Defenses" type="Node" parent="." node_paths=PackedStringArray("health")]
+script = ExtResource("21_def")
+health = NodePath("../Health")
 
 [node name="NavMovement" type="Node" parent="." node_paths=PackedStringArray("agent")]
 script = ExtResource("1_move")
@@ -141,9 +149,10 @@ mana = NodePath("../Mana")
 potions = NodePath("../PotionBelt")
 visual = NodePath("../Visual")
 
-[node name="HitFeedback" type="Node" parent="." node_paths=PackedStringArray("health", "body_mesh")]
+[node name="HitFeedback" type="Node" parent="." node_paths=PackedStringArray("health", "defenses", "body_mesh")]
 script = ExtResource("8_feedback")
 health = NodePath("../Health")
+defenses = NodePath("../Defenses")
 body_mesh = NodePath("../Visual/Body")
 number_color = Color(1, 0.35, 0.3, 1)
 number_height = 2.3
@@ -163,3 +172,18 @@ inventory = NodePath("../Inventory")
 health = NodePath("../Health")
 combat = NodePath("../PlayerCombat")
 click_move = NodePath("../ClickMoveInput")
+
+[node name="Equipment" type="Node" parent="."]
+script = ExtResource("20_equip")
+starting_items = Array[StringName]([&"rusted_hatchet"])
+
+[node name="CharacterStats" type="Node" parent="." node_paths=PackedStringArray("equipment", "health", "mana", "defenses", "melee", "movement", "potions", "skill_bar")]
+script = ExtResource("22_stats")
+equipment = NodePath("../Equipment")
+health = NodePath("../Health")
+mana = NodePath("../Mana")
+defenses = NodePath("../Defenses")
+melee = NodePath("../Melee")
+movement = NodePath("../NavMovement")
+potions = NodePath("../PotionBelt")
+skill_bar = NodePath("../SkillBar")

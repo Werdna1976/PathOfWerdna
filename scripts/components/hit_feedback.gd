@@ -6,6 +6,8 @@ const NUMBER_RISE: float = 1.2
 const NUMBER_LIFETIME: float = 0.8
 
 @export var health: Health
+## Optional. Shows "Block" / "Evade" when a hit is avoided.
+@export var defenses: Defenses
 @export var body_mesh: MeshInstance3D
 @export var number_color: Color = Color(1.0, 0.95, 0.85)
 @export var number_height: float = 2.0
@@ -16,6 +18,8 @@ var _flash_tween: Tween
 
 func _ready() -> void:
 	health.damaged.connect(_on_damaged)
+	if defenses != null:
+		defenses.avoided.connect(func(how: String) -> void: _spawn_text(how, Color(0.8, 0.8, 0.8)))
 	# Each instance gets its own material so flashes don't bleed across bodies.
 	_flash_material = (body_mesh.material_override as StandardMaterial3D).duplicate() as StandardMaterial3D
 	_flash_material.emission_enabled = true
@@ -38,16 +42,20 @@ func _flash() -> void:
 
 
 func _spawn_number(amount: float) -> void:
+	_spawn_text(str(int(roundf(amount))), number_color)
+
+
+func _spawn_text(text: String, color: Color) -> void:
 	var owner_body: Node3D = get_parent() as Node3D
 	var label := Label3D.new()
-	label.text = str(int(amount))
+	label.text = text
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.no_depth_test = true
 	label.shaded = false
 	label.font_size = 56
 	label.outline_size = 12
 	label.pixel_size = 0.008
-	label.modulate = number_color
+	label.modulate = color
 	# Parent to the level so the number stays put if the body moves or dies.
 	owner_body.get_parent().add_child(label)
 	var jitter := Vector3(randf_range(-0.3, 0.3), 0.0, randf_range(-0.3, 0.3))

@@ -20,12 +20,20 @@ func _ready() -> void:
 func drop() -> Array[GroundItem]:
 	var level: int = AreaInfo.level_of(get_tree())
 	var generator := ItemGenerator.new()
+	# The killer's item quantity and rarity (from charms) improve the drops.
+	var quantity: float = 1.0
+	var rarity_bonus: float = 0.0
+	var player: Node = get_tree().get_first_node_in_group("player")
+	var stats: CharacterStats = player.get_node_or_null("CharacterStats") as CharacterStats if player != null else null
+	if stats != null:
+		quantity += stats.stat(&"item_quantity") / 100.0
+		rarity_bonus = stats.stat(&"item_rarity")
 	var dropped: Array[GroundItem] = []
 	for i: int in rolls:
-		if generator.rng.randf() < item_chance:
+		if generator.rng.randf() < item_chance * quantity:
 			var base: ItemBase = generator.random_base(level)
-			dropped.append(_place(generator.generate(base, level), generator))
-		if generator.rng.randf() < currency_chance:
+			dropped.append(_place(generator.generate(base, level, -1, rarity_bonus), generator))
+		if generator.rng.randf() < currency_chance * quantity:
 			var orb: ItemBase = generator.random_base(level, true)
 			dropped.append(_place(generator.generate(orb, level), generator))
 	return dropped

@@ -52,13 +52,16 @@ func show_item(item: Item, detailed: bool = false) -> void:
 
 	var stats: Dictionary = item.base.stats
 	if stats.has("phys_min"):
-		_add("Physical Damage: %d-%d" % [stats["phys_min"], stats["phys_max"]], VALUE_COLOR)
+		var damage: Vector2 = item.weapon_damage()
+		_add("Physical Damage: %d-%d" % [damage.x, damage.y], _local_color(item, &"local_phys_percent", &"local_added_phys"))
 		_add("Attacks per Second: %.2f" % stats["aps"], VALUE_COLOR)
-	for key: String in ["armour", "evasion", "energy_shield", "block"]:
-		if stats.has(key):
-			var label: String = {"armour": "Armour", "evasion": "Evasion Rating",
-				"energy_shield": "Energy Shield", "block": "Chance to Block"}[key]
-			_add("%s: %d%s" % [label, stats[key], "%" if key == "block" else ""], VALUE_COLOR)
+	for key: StringName in [&"armour", &"evasion", &"energy_shield"]:
+		var value: int = item.local_defence(key)
+		if value > 0:
+			var label: String = {&"armour": "Armour", &"evasion": "Evasion Rating", &"energy_shield": "Energy Shield"}[key]
+			_add("%s: %d" % [label, value], _local_color(item, &"local_defences_percent", key))
+	if stats.has("block"):
+		_add("Chance to Block: %d%%" % stats["block"], VALUE_COLOR)
 	if item.sockets > 0:
 		_add("Sockets: %s" % "o ".repeat(item.sockets).strip_edges(), VALUE_COLOR)
 	_add("Item Level: %d" % item.ilvl, LABEL_COLOR)
@@ -83,6 +86,11 @@ func show_item(item: Item, detailed: bool = false) -> void:
 						tier, def.tiers[roll["tier"]]["name"]]
 				_add(text, AFFIX_COLOR)
 	_finish()
+
+
+## Values raised by the item's own mods show in the affix colour, as in PoE.
+func _local_color(item: Item, stat_a: StringName, stat_b: StringName) -> Color:
+	return AFFIX_COLOR if item.stat_total(stat_a) > 0 or item.stat_total(stat_b) > 0 else VALUE_COLOR
 
 
 func _finish() -> void:

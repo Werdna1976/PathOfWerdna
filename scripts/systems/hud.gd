@@ -24,6 +24,11 @@ var _death_label: Label
 
 var _skill_bar: SkillBar
 var _potion_belt: PotionBelt
+var _es_frame: ColorRect
+var _es_fill: ColorRect
+
+var inventory_screen: InventoryScreen
+var character_sheet: CharacterSheet
 
 
 func _ready() -> void:
@@ -75,6 +80,18 @@ func _bind_player() -> void:
 
 	(player.get_node("ItemPickup") as ItemPickup).pickup_failed.connect(_show_message)
 
+	_build_energy_shield_bar()
+	var defenses: Defenses = player.get_node("Defenses") as Defenses
+	defenses.energy_shield_changed.connect(_on_energy_shield_changed)
+	_on_energy_shield_changed(defenses.energy_shield, defenses.max_energy_shield)
+
+	character_sheet = CharacterSheet.new()
+	add_child(character_sheet)
+	character_sheet.bind(player)
+	inventory_screen = InventoryScreen.new()
+	add_child(inventory_screen)
+	inventory_screen.bind(player)
+
 
 func _process(delta: float) -> void:
 	if _message_time > 0.0:
@@ -89,6 +106,30 @@ func _process(delta: float) -> void:
 			fraction = _skill_bar.cooldown_left(gem) / gem.cooldown
 		_slot_cooldowns[slot].size.y = SLOT_SIZE.y * fraction
 		_slot_cooldowns[slot].position.y = SLOT_SIZE.y * (1.0 - fraction)
+
+
+func _build_energy_shield_bar() -> void:
+	var life_frame: ColorRect = _life["frame"]
+	_es_frame = ColorRect.new()
+	_es_frame.color = Color(0.0, 0.0, 0.0, 0.8)
+	_es_frame.size = Vector2(life_frame.size.x, 10.0)
+	_es_frame.anchor_top = 1.0
+	_es_frame.anchor_bottom = 1.0
+	_es_frame.position = life_frame.position - Vector2(0.0, 12.0)
+	_es_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_es_frame)
+	_es_fill = ColorRect.new()
+	_es_fill.color = Color(0.55, 0.75, 0.95)
+	_es_fill.position = Vector2(2.0, 2.0)
+	_es_fill.size = Vector2(BAR_SIZE.x, 6.0)
+	_es_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_es_frame.add_child(_es_fill)
+
+
+func _on_energy_shield_changed(current: float, maximum: float) -> void:
+	_es_frame.visible = maximum > 0.0
+	if maximum > 0.0:
+		_es_fill.size.x = BAR_SIZE.x * clampf(current / maximum, 0.0, 1.0)
 
 
 func _on_life_changed(current: float, maximum: float) -> void:

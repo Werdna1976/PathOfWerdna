@@ -10,7 +10,7 @@ extends Node
 ## how enemies attack.
 
 signal swing_started
-signal swing_hit(target: Node3D, damage: float)
+signal swing_hit(target: Node3D, damage: float, critical: bool)
 signal swing_finished
 
 enum Phase { IDLE, WINDUP, RECOVERY }
@@ -32,6 +32,17 @@ const LEAP_HEIGHT: float = 1.6
 ## Raised along an arc while leaping. Optional.
 @export var leap_visual: Node3D
 
+## Set by CharacterStats for the player; enemies keep the defaults.
+## Divides wind-up and recovery (2.0 = twice as fast).
+var speed_multiplier: float = 1.0
+## Percent chance, and damage percent on a critical strike.
+var crit_chance: float = 0.0
+var crit_multiplier: float = 150.0
+## Scales the radius of area skills (Cleave, Leap Slam).
+var area_multiplier: float = 1.0
+## Hits that leave a target below this percent of its life kill it.
+var culling_percent: float = 0.0
+
 var _phase: Phase = Phase.IDLE
 var _time_left: float = 0.0
 var _skill: SkillGem
@@ -51,11 +62,11 @@ func current_skill() -> SkillGem:
 
 
 func current_windup() -> float:
-	return _skill.windup if _skill != null else windup
+	return (_skill.windup if _skill != null else windup) / speed_multiplier
 
 
 func current_recovery() -> float:
-	return _skill.recovery if _skill != null else recovery
+	return (_skill.recovery if _skill != null else recovery) / speed_multiplier
 
 
 func current_arc() -> float:
@@ -130,15 +141,23 @@ func _resolve_hit() -> void:
 	var multiplier: float = _skill.damage_multiplier if _skill != null else 1.0
 	var hit_all: bool = _skill != null and _skill.hits_all
 	for target: Node3D in _find_targets(hit_all):
-		var damage: float = roundf(randf_range(damage_min, damage_max) * multiplier)
-		Health.of(target).take_damage(damage)
-		swing_hit.emit(target, damage)
+		var damage: float = randf_range(damage_min, damage_max) * multiplier
+		var critical: bool = randf() * 100.0 < crit_chance
+		if critical:
+			damage *= crit_multiplier / 100.0
+		var health: Health = Health.of(target)
+		health.take_damage(roundf(damage))
+		if culling_percent > 0.0 and not health.is_dead() 				and health.current < health.max_health * culling_percent / 100.0:
+			health.take_damage(health.current + 1.0, &"culling")
+		swing_hit.emit(target, damage, critical)
 
 
 ## Living targets in the swing area, closest first. Only the closest unless `hit_all`.
 func _find_targets(hit_all: bool) -> Array[Node3D]:
 	var shape := SphereShape3D.new()
 	shape.radius = _skill.reach if _skill != null else reach
+	if hit_all:
+		shape.radius *= area_multiplier
 	var params := PhysicsShapeQueryParameters3D.new()
 	params.shape = shape
 	params.transform = Transform3D(Basis.IDENTITY, _body.global_position + Vector3.UP * strike_height)

@@ -8,6 +8,8 @@ signal changed(current: float, maximum: float)
 signal died
 
 @export var max_health: float = 100.0
+## Optional. When set, hits go through block, evasion, armour, resistances and energy shield.
+@export var defenses: Defenses
 
 var current: float
 
@@ -20,10 +22,18 @@ func is_dead() -> bool:
 	return current <= 0.0
 
 
-func take_damage(amount: float) -> void:
+## Deals a hit of `damage_type` (physical, fire, cold, lightning, chaos).
+## `damaged` reports the damage after mitigation, including any taken by energy shield.
+func take_damage(amount: float, damage_type: StringName = &"physical") -> void:
 	if is_dead() or amount <= 0.0:
 		return
-	current = maxf(current - amount, 0.0)
+	var to_life: float = amount
+	if defenses != null:
+		amount = defenses.mitigate(amount, damage_type)
+		if amount < 0.0:
+			return
+		to_life = defenses.absorb(amount)
+	current = maxf(current - to_life, 0.0)
 	damaged.emit(amount)
 	changed.emit(current, max_health)
 	if is_dead():
@@ -37,7 +47,18 @@ func heal(amount: float) -> void:
 	changed.emit(current, max_health)
 
 
+## Changes maximum life, keeping the same fraction of life filled.
+func set_max_health(value: float) -> void:
+	var fraction: float = current / max_health if max_health > 0.0 else 1.0
+	max_health = value
+	if not is_dead():
+		current = clampf(roundf(value * fraction), 1.0, value)
+	changed.emit(current, max_health)
+
+
 func restore_full() -> void:
+	if defenses != null:
+		defenses.restore_full()
 	current = max_health
 	changed.emit(current, max_health)
 

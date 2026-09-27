@@ -229,7 +229,7 @@ res://
 3. **Gems and potions:** the gem data model, the 3 actives on the skill bar, mana, and both potions.
 4. **Loot**, split into three parts:
    - **4a, items and drops:** item levels, bases, affix rolling, drops, ground labels and pickup. *(Done.)*
-   - **4b, inventory and equipment:** the inventory screen, equipping the 10 slots, and gear stats applying to Werdna.
+   - **4b, inventory and equipment:** the inventory screen, equipping the 10 slots, and gear stats applying to Werdna. *(Done.)*
    - **4c, sockets and gems:** socketing gems, support gems, and the skill bar drawing from socketed gems.
 5. **Progression:** XP, levels, attributes and the warrior region of the skill tree.
 6. **Content:** more enemies, a boss, a town hub and procedural map pieces.
