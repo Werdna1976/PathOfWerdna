@@ -8,6 +8,8 @@ extends CanvasLayer
 
 const PADDING: Vector2 = Vector2(8.0, 3.0)
 const GAP: float = 2.0
+## Size of the item icon at the start of each label.
+const ICON_SIZE: float = 18.0
 
 ## GroundItem -> label Control
 var _labels: Dictionary = {}
@@ -100,6 +102,19 @@ func _make_label(ground: GroundItem) -> Control:
 	panel.add_theme_stylebox_override("panel", style)
 	panel.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 5)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(row)
+	var icon_texture: Texture2D = ItemIcons.texture_for(item)
+	if icon_texture != null:
+		var icon := TextureRect.new()
+		icon.texture = icon_texture
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.custom_minimum_size = Vector2(ICON_SIZE, ICON_SIZE)
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(icon)
 	var text := Label.new()
 	text.text = item.display_name()
 	if item.base.is_currency() and item.stack > 1:
@@ -107,7 +122,7 @@ func _make_label(ground: GroundItem) -> Control:
 	text.add_theme_color_override("font_color", item.color())
 	text.add_theme_font_size_override("font_size", 14)
 	text.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.add_child(text)
+	row.add_child(text)
 
 	panel.gui_input.connect(_on_label_input.bind(ground))
 	panel.mouse_entered.connect(func() -> void: _hovered = ground)

@@ -41,6 +41,19 @@ func _run() -> void:
 		game.camera.snap_to_target()
 		if _args.has("hide_hud"):
 			game.hud.visible = false
+		# --drops=N scatters N random items (and some orbs) around the player.
+		var gen := ItemGenerator.new(7)
+		for i: int in int(_args.get("drops", "0")):
+			var angle: float = TAU * i / maxf(float(_args.get("drops", "1")), 1.0)
+			var base: ItemBase = gen.random_base(40, i % 4 == 0)
+			var item: Item = gen.generate(base, 40, -1, 150.0)
+			GroundItem.spawn(item, game.current_zone, at + Vector3(cos(angle), 0, sin(angle)) * 2.2)
+		# --inventory fills the bag with random items and opens the inventory.
+		if _args.has("inventory"):
+			var inventory: Inventory = game.player.get_node("Inventory") as Inventory
+			for i: int in 14:
+				inventory.try_add(gen.generate(gen.random_base(40, i % 5 == 0), 40, -1, 150.0))
+			game.hud.inventory_screen.toggle()
 	else:
 		var cam := Camera3D.new()
 		cam.fov = 35.0

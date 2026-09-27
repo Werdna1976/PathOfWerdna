@@ -184,15 +184,12 @@ func _draw() -> void:
 		var item: Item = e["item"]
 		var r := Rect2(origin + Vector2(e["pos"]) * CELL, Vector2(item.base.size) * CELL)
 		var inner: Rect2 = r.grow(-2.0)
-		var color: Color = item.color()
-		draw_rect(inner, color.darkened(0.75))
-		draw_rect(inner, color, false, 1.5)
-		var label: String = (item.gem as GemData).short_name if item.base.is_gem() else item.base.name
-		draw_multiline_string(_font, inner.position + Vector2(3.0, 12.0), label, HORIZONTAL_ALIGNMENT_CENTER,
-			inner.size.x - 6.0, 10 if r.size.x > CELL else 8, 3, color)
+		InventoryScreen.draw_item_tile(self, _font, item, r)
 		var price: Dictionary = Shop.price(item)
-		draw_string(_font, inner.position + Vector2(2.0, inner.size.y - 3.0), "%d %s" % [price["amount"], PRICE_SHORT.get(price["id"], "?")],
-			HORIZONTAL_ALIGNMENT_RIGHT, inner.size.x - 4.0, 9, Item.CURRENCY_COLOR)
+		var price_text: String = "%d %s" % [price["amount"], PRICE_SHORT.get(price["id"], "?")]
+		var price_pos: Vector2 = inner.position + Vector2(2.0, inner.size.y - 3.0)
+		draw_string_outline(_font, price_pos, price_text, HORIZONTAL_ALIGNMENT_RIGHT, inner.size.x - 4.0, 9, 4, Color.BLACK)
+		draw_string(_font, price_pos, price_text, HORIZONTAL_ALIGNMENT_RIGHT, inner.size.x - 4.0, 9, Item.CURRENCY_COLOR)
 
 	var sell: Rect2 = sell_rect()
 	var held: Item = inventory_screen.held

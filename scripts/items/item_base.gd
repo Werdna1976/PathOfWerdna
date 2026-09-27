@@ -17,6 +17,8 @@ var description: String = ""
 var stats: Dictionary = {}
 ## {stat, min, max, text}, or empty.
 var implicit: Dictionary = {}
+## Optional icon id in assets/icons/; empty = pick one by type (see ItemIcons).
+var icon: String = ""
 
 
 static func from_dict(d: Dictionary) -> ItemBase:
@@ -41,6 +43,7 @@ static func from_dict(d: Dictionary) -> ItemBase:
 		if d.has(key):
 			base.stats[key] = int(d[key])
 	base.implicit = d.get("implicit", {})
+	base.icon = d.get("icon", "")
 	return base
 
 

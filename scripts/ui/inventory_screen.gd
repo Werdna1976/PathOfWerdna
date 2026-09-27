@@ -11,7 +11,8 @@ extends Control
 ##   socket to take its gem out. Solid dots are active gems; rings are supports.
 ## - Right click an orb to start crafting with it, then left click an item to
 ##   apply it. Hold Shift to keep going; right click or Esc stops.
-## Everything is drawn in _draw(); items are coloured boxes with their names.
+## Everything is drawn in _draw(); items show their icon (ItemIcons) framed by
+## their rarity colour.
 
 const CELL: float = 40.0
 const PAD: float = 16.0
@@ -442,20 +443,32 @@ func _draw_held() -> void:
 
 
 func _draw_item(item: Item, r: Rect2, alpha: float = 1.0) -> void:
-	var color: Color = item.color()
-	var inner: Rect2 = r.grow(-2.0)
-	draw_rect(inner, Color(color.darkened(0.75), 0.95 * alpha))
-	draw_rect(inner, Color(color, alpha), false, 1.5)
-	var label: String = item.base.name
-	if item.base.is_currency():
-		label = str(item.stack)
-	elif item.base.is_gem():
-		label = (item.gem as GemData).short_name
-	var font_size: int = 11 if r.size.x > CELL else 8
-	draw_multiline_string(_font, inner.position + Vector2(3.0, 13.0), label, HORIZONTAL_ALIGNMENT_CENTER,
-		inner.size.x - 6.0, font_size, 4, Color(color, alpha))
+	draw_item_tile(self, _font, item, r, alpha)
 	for i: int in item.sockets:
 		_draw_socket(socket_center(item, r, i), item.socketed_gem(i), alpha)
+
+
+## Draws an item's tile: a dark background with a rarity-coloured border and
+## its icon (the name instead, if it has no icon). Currency shows its stack
+## size. Shared with the vendor screen.
+static func draw_item_tile(canvas: CanvasItem, font: Font, item: Item, r: Rect2, alpha: float = 1.0) -> void:
+	var color: Color = item.color()
+	var inner: Rect2 = r.grow(-2.0)
+	canvas.draw_rect(inner, Color(color.darkened(0.8), 0.95 * alpha))
+	canvas.draw_rect(inner, Color(color, alpha), false, 1.5)
+	var icon: Texture2D = ItemIcons.texture_for(item)
+	if icon != null:
+		canvas.draw_texture_rect(icon, ItemIcons.fit(icon.get_size(), inner, 3.0), false, Color(1, 1, 1, alpha))
+	else:
+		var label: String = (item.gem as GemData).short_name if item.base.is_gem() else item.base.name
+		canvas.draw_multiline_string(font, inner.position + Vector2(3.0, 13.0), label, HORIZONTAL_ALIGNMENT_CENTER,
+			inner.size.x - 6.0, 11 if r.size.x > CELL else 8, 4, Color(color, alpha))
+	if item.base.is_currency():
+		var count: String = str(item.stack)
+		canvas.draw_string_outline(font, inner.position + Vector2(3.0, 13.0), count, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, 4,
+			Color(0, 0, 0, alpha))
+		canvas.draw_string(font, inner.position + Vector2(3.0, 13.0), count, HORIZONTAL_ALIGNMENT_LEFT, -1, 13,
+			Color(1.0, 0.95, 0.85, alpha))
 
 
 func _draw_socket(center: Vector2, gem_item: Item, alpha: float) -> void:
