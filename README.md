@@ -53,8 +53,8 @@ Keys are bound by physical location, so they stay in the same place on non-QWERT
 
 - **Heavy Strike** (the `HeavyStrike` node, a `MeleeAttack`) deals 12–20 damage with a 0.22 s
   wind-up and 0.3 s recovery. It hits the closest living enemy in a 110° arc in front of Werdna.
-  - Movement is locked during a swing, and a move ordered mid-swing starts when the swing ends.
-  - Holding right click keeps attacking. Left click cancels a pending attack.
+  - Skills work while walking. Melee swings slow Werdna to 35% speed instead of stopping him, and he keeps facing the swing. Leap Slam works mid-walk, and holding left click keeps walking after landing.
+  - Holding right click keeps attacking. While holding left click, attacks hit in place toward the target instead of walking to it. A new move click cancels a pending attack.
 - **Goblins** (`scenes/enemies/goblin.tscn`) have 40 life and deal 4–7 damage with a slow club
   swing. `EnemyAI` keeps them idle until the player comes within 11 units or hits them, then
   they chase and attack.

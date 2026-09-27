@@ -11,9 +11,13 @@ signal destination_reached
 @export var turn_sharpness: float = 14.0
 @export var gravity: float = 20.0
 
-## While locked (e.g. mid-swing) the body holds still but keeps its target,
-## so a move ordered during an attack starts as soon as the attack ends.
+## While locked (e.g. mid-leap) the body holds still but keeps its target,
+## so a move ordered during an action starts as soon as it ends.
 var locked: bool = false
+## Multiplies move speed; attacks slow the player instead of stopping them.
+var speed_scale: float = 1.0
+## Keep the current facing while moving (so a swing stays aimed).
+var hold_facing: bool = false
 
 var _moving: bool = false
 
@@ -54,9 +58,10 @@ func _step_velocity(delta: float) -> Vector3:
 	if distance < 0.001:
 		return Vector3.ZERO
 	var direction: Vector3 = to_next / distance
-	_face(direction, delta)
+	if not hold_facing:
+		_face(direction, delta)
 	# Don't overshoot the waypoint on the last step.
-	var speed: float = minf(move_speed, distance / delta)
+	var speed: float = minf(move_speed * speed_scale, distance / delta)
 	return direction * speed
 
 

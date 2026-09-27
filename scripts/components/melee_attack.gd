@@ -45,6 +45,11 @@ func is_busy() -> bool:
 	return _phase != Phase.IDLE
 
 
+## The gem being used, or null for a plain (enemy) swing.
+func current_skill() -> SkillGem:
+	return _skill if is_busy() else null
+
+
 func current_windup() -> float:
 	return _skill.windup if _skill != null else windup
 

@@ -14,6 +14,10 @@ signal move_ordered
 var _holding: bool = false
 
 
+func is_holding() -> bool:
+	return _holding
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not event.is_action_pressed("move"):
 		return

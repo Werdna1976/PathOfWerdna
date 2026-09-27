@@ -4,12 +4,18 @@ extends Node
 ## - Melee skills: aimed at an enemy, walk into range and hit it; aimed at the
 ##   ground, swing in place toward the cursor.
 ## - Leap skills: jump toward the cursor, up to the skill's range.
-## Holding a slot's key keeps using it. Moving cancels the pending order.
+## Holding a slot's key keeps using it. Skills work while walking: melee
+## swings slow movement (see attack_move_scale) instead of stopping it, and
+## while left click is held they hit in place instead of walking to the target.
+## A new move click cancels a pending order.
 
 @export var movement: NavMovement
 @export var melee: MeleeAttack
 @export var health: Health
 @export var skill_bar: SkillBar
+@export var click_move: ClickMoveInput
+## Movement speed multiplier while swinging a melee skill.
+@export_range(0.0, 1.0) var attack_move_scale: float = 0.35
 @export_flags_3d_physics var enemy_mask: int = 4
 @export_flags_3d_physics var ground_mask: int = 1
 
@@ -24,8 +30,9 @@ var _point: Vector3 = CursorRay.NO_HIT
 
 
 func _ready() -> void:
-	melee.swing_started.connect(func() -> void: movement.locked = true)
-	melee.swing_finished.connect(func() -> void: movement.locked = false)
+	melee.swing_started.connect(_on_swing_started)
+	melee.swing_finished.connect(_on_swing_finished)
+	click_move.move_ordered.connect(clear)
 
 
 ## Orders the skill in `slot` against an enemy (also used by tests).
@@ -74,9 +81,6 @@ func _unhandled_input(event: InputEvent) -> void:
 func _physics_process(_delta: float) -> void:
 	if health.is_dead():
 		return
-	if Input.is_action_pressed("move"):
-		clear()
-		return
 	if melee.is_busy():
 		return
 	var held: int = _held_slot()
@@ -94,11 +98,13 @@ func _physics_process(_delta: float) -> void:
 	var holding: bool = held == _slot
 	if gem.is_leap():
 		_leap(gem)
-	elif _target != null:
+	elif _target != null and not click_move.is_holding():
 		_pursue(gem, holding)
-	elif _point.is_finite():
-		movement.stop()
-		_use(gem, _point - _body.global_position)
+	else:
+		# Strike in place toward the target or point; any walking continues, slowed.
+		var aim: Vector3 = _target.global_position if _target != null else _point
+		if aim.is_finite():
+			_use(gem, aim - _body.global_position)
 		clear()
 
 
@@ -126,9 +132,26 @@ func _leap(gem: SkillGem) -> void:
 	var map: RID = _body.get_world_3d().navigation_map
 	var landing: Vector3 = NavigationServer3D.map_get_closest_point(map, _body.global_position + offset)
 	landing.y = _body.global_position.y
-	movement.stop()
+	# Holding left click keeps walking after landing; otherwise stand at the landing spot.
+	if not click_move.is_holding():
+		movement.stop()
 	_use(gem, offset, landing)
 	clear()
+
+
+func _on_swing_started() -> void:
+	var skill: SkillGem = melee.current_skill()
+	if skill != null and skill.is_leap():
+		movement.locked = true  # the leap itself moves the body
+	else:
+		movement.speed_scale = attack_move_scale
+		movement.hold_facing = true
+
+
+func _on_swing_finished() -> void:
+	movement.locked = false
+	movement.speed_scale = 1.0
+	movement.hold_facing = false
 
 
 ## Starts the skill if it's off cooldown and affordable. Returns whether it started.

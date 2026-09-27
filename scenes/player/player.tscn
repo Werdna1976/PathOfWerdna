@@ -123,12 +123,13 @@ script = ExtResource("2_input")
 movement = NodePath("../NavMovement")
 marker_scene = ExtResource("3_marker")
 
-[node name="PlayerCombat" type="Node" parent="." node_paths=PackedStringArray("movement", "melee", "health", "skill_bar")]
+[node name="PlayerCombat" type="Node" parent="." node_paths=PackedStringArray("movement", "melee", "health", "skill_bar", "click_move")]
 script = ExtResource("6_combat")
 movement = NodePath("../NavMovement")
 melee = NodePath("../Melee")
 health = NodePath("../Health")
 skill_bar = NodePath("../SkillBar")
+click_move = NodePath("../ClickMoveInput")
 
 [node name="PlayerRespawn" type="Node" parent="." node_paths=PackedStringArray("health", "movement", "melee", "combat", "mana", "potions", "visual")]
 script = ExtResource("7_respawn")

@@ -48,6 +48,8 @@ func _run() -> void:
 	await _test_not_enough_mana()
 	await _test_mana_regen()
 	await _test_potions()
+	await _test_attack_while_walking()
+	await _test_leap_while_walking()
 
 	_arena.queue_free()
 	await process_frame
@@ -189,6 +191,43 @@ func _test_potions() -> void:
 	Health.of(goblin).take_damage(1000.0)
 	_check("killing an enemy refills potion charges", _potions.charges[0] == _potions.charges_per_kill)
 	await _frames(300)
+
+
+func _test_attack_while_walking() -> void:
+	await _reset_player()
+	var movement: NavMovement = _player.get_node("NavMovement") as NavMovement
+	var destination: Vector3 = OPEN_SPOT + Vector3(-8.0, 0, 0)
+	movement.set_target(destination)
+	await _frames(20)
+	# Swing to the side while walking west.
+	var before: Vector3 = _player.global_position
+	_combat.order_point(SLOT_HEAVY, _player.global_position + Vector3(0, 0, -3))
+	await _frames(2)
+	_check("a strike can start while walking", _melee.is_busy())
+	await _frames(10)
+	var swing_speed: float = _flat(_player.global_position - before) / (12.0 / 60.0)
+	var facing: Vector3 = -_player.global_basis.z
+	print("  info: speed during swing %.2f u/s (walk speed %.1f)" % [swing_speed, movement.move_speed])
+	_check("walking continues during the swing, slowed", swing_speed > 0.5 and swing_speed < movement.move_speed * 0.6)
+	_check("the swing keeps facing its target while walking", facing.dot(Vector3.FORWARD) > 0.9)
+	for i: int in 240:
+		await physics_frame
+		if not movement.is_moving():
+			break
+	_check("walking resumes and reaches the destination", _flat(_player.global_position - destination) < 0.5)
+
+
+func _test_leap_while_walking() -> void:
+	await _reset_player()
+	var movement: NavMovement = _player.get_node("NavMovement") as NavMovement
+	movement.set_target(OPEN_SPOT + Vector3(-8.0, 0, 0))
+	await _frames(20)
+	var before: Vector3 = _player.global_position
+	_combat.order_point(SLOT_LEAP, before + Vector3(6.0, 0, 0))
+	await _frames(40)
+	var moved: float = _player.global_position.x - before.x
+	print("  info: leap while walking moved %.2f units east" % moved)
+	_check("Leap Slam works while walking, even against the walking direction", moved > 5.0)
 
 
 func _reset_player() -> void:
