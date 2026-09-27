@@ -78,6 +78,15 @@ func _ready() -> void:
 	_listener = AudioListener3D.new()
 	add_child(_listener)
 	get_tree().node_added.connect(_on_node_added)
+	# When the game launches normally, the main scene is already in the tree
+	# before this autoload is ready, so node_added never fires for it. Hook
+	# every existing node too (and catch up on a zone that's already loaded).
+	for node: Node in get_tree().root.find_children("*", "", true, false):
+		if node != self and not is_ancestor_of(node):
+			_on_node_added(node)
+	var game: Game = get_tree().get_first_node_in_group(Game.GROUP) as Game
+	if game != null and game.current_zone != null:
+		_on_zone_changed(game.current_zone)
 
 
 func _exit_tree() -> void:
